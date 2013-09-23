@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name        myplace.baidu.yun.albums
-// @namespace   eotect@gmail.com
+// @namespace   eotect@myplace
 // @description 百度专辑批理转存
 // @include     http://yun.baidu.com/pcloud/album/*
 // @version     1

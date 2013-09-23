@@ -9,8 +9,8 @@
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = $myPlace.jQuery || unsafeWindow.$;
-$myPlace.mod = $myPlace.mod ? $myPlace.mod || {};
-var panel $myPlace.panel;
+$myPlace.mod = $myPlace.mod || {};
+var panel=$myPlace.panel;
 
 (function(_){
 	_.google = {
@@ -51,7 +51,7 @@ var panel $myPlace.panel;
 				{
 					html	: ' #Standard',
 					set		:  function() {
-						document.location.href = href.replace(/&sout=1/gi,'');
+						document.location.href = document.location.href.replace(/&sout=1/gi,'');
 					},
 				},
 				function() {
@@ -60,7 +60,7 @@ var panel $myPlace.panel;
 				{
 					html	: ' #Classic',
 					set		: function() {
-						document.location.href = href.replace('&','&sout=1&');
+						document.location.href = document.location.href.replace('&','&sout=1&');
 					},
 				}
 			);
@@ -73,7 +73,7 @@ var panel $myPlace.panel;
 					html: ' +Torrent',
 					set	: function() {
 						document.location.href = 
-							href.replace(/([&\?])q=([^&]+)/gi,'$1q=$2+' + torrent_text);
+							document.location.href.replace(/([&\?])q=([^&]+)/gi,'$1q=$2+' + torrent_text);
 					}
 				},
 				function() {
@@ -83,18 +83,21 @@ var panel $myPlace.panel;
 					html: ' -Torrent',
 					set	: function(element,test) {
 						document.location.href = 
-							href.replace(new RegExp('\\+' + torrent_exp,'gi'),'');
+							document.location.href.replace(new RegExp('\\+' + torrent_exp,'gi'),'');
 					}
 				}
 			);
 		},
 	};
+	
+	$(document).ready(function() {	
+		_.google.fixLinks();		
+	});
+	_.google.addClassicSwitch();
+	_.google.addTorrentSwitch();
+	panel.show();
 })($myPlace.mod);
 
-$(document).ready(function() {
-		var a = $myPlace.mod.google;
-		a.fixLinks();
-		a.addClassicSwitch();
-		a.addTorrentSwitch();
-});
+
+
 

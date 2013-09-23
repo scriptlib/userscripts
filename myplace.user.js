@@ -3,9 +3,10 @@
 // @namespace      eotect@myplace
 // @description    $myPlace
 // @include        *
+// @version		 	1.0
 // ==/UserScript==
 
-$myPlace = $myPlace || unsafeWindow.$myPlace || {};
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 
 (function(_){
@@ -20,6 +21,14 @@ unsafeWindow.$myPlace = $myPlace;
 	};
 	_.service = function(name) {
 		return _._models[name];
+	};
+	_.log = function(txt,mode) {
+		if(console) {
+			return console.log(txt);
+		}
+		else {
+			alert(txt);
+		}
 	};
 })($myPlace);
 

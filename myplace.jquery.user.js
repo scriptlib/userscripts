@@ -8,7 +8,7 @@
 // @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
 // ==/UserScript==
 
-$myPlace = $myPlace || unsafeWindow.$myPlace || {};
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 
 (function(_){

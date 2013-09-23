@@ -10,8 +10,8 @@
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var XRZPanel = $myPlace.panel;
-
 if(!XRZPanel.init()) return false;
+
 
 function debugPrint(text) {
     //GM_log("BBSPanel:" + text);

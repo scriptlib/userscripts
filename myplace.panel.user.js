@@ -6,14 +6,8 @@
 // @version        1.0
 // ==/UserScript==
 
-if(!$myPlace) {
-  $myPlace = unsafeWindow.$myPlace;
-}
-if(!$myPlace) {
-  $myPlace = {};
-}
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-
 
 (function(_){
 	const PANEL_ID = "xrlin_panel";
@@ -43,11 +37,11 @@ unsafeWindow.$myPlace = $myPlace;
 		init : function() {
 			debugPrint("Start on " + document.location);
 			if(parent != window) {
-				debugPrint("In a frame? Stop here!");
+				//debugPrint("In a frame? Stop here!");
 				return false;
 			}
 			if(document.getElementById(PANEL_ID)) {
-				debugPrint("Panel already created? Stop here!");
+				//debugPrint("Panel already created? Stop here!");
 				this.DOMParent = document.body;
 				this.DOMPanel = document.getElementById(PANEL_ID);
 				this.DOMBox = document.getElementById(PANEL_BOX_ID);
