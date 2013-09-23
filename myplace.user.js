@@ -5,11 +5,9 @@
 // @include        *
 // ==/UserScript==
 
-$myPlace=unsafeWindow.$myPlace;
-if(!$myPlace) {
-  $myPlace = {};
-}
+$myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
+
 (function(_){
 	_._models = {};
 	_.register = function(name,value){
