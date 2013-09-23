@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        myplace.baidu.yun.fileman.user
+// @name        myplace.baidu.yun.fileman
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
