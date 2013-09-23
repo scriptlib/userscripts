@@ -2,6 +2,7 @@
 // @name           myplace.jquery
 // @namespace      eotect@myplace
 // @description    $myPlace.jQuery
+// @version		   1.0
 // @include        *
 // @require			http://code.jquery.com/jquery-1.10.2.min.js
 // @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
