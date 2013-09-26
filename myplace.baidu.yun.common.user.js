@@ -6,12 +6,12 @@
 // @include     http://pan.baidu.com/share/*
 // @include     http://yun.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.0
+// @version     1.001
 // ==/UserScript==
 
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = $myPlace.jQuery || unsafeWindow.$;
+var $ = unsafeWindow.$ || $myPlace.jQuery;
 $myPlace.baidu = $myPlace.baidu || {};
 $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 

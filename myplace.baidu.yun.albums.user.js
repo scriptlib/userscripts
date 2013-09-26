@@ -3,12 +3,12 @@
 // @namespace   eotect@myplace
 // @description 百度专辑批理转存
 // @include     http://yun.baidu.com/pcloud/album/*
-// @version     1
+// @version     1.001
 // ==/UserScript==
 
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = $myPlace.jQuery || unsafeWindow.$;
+var $ = unsafeWindow.$ || $myPlace.jQuery;
 $myPlace.baidu = $myPlace.baidu || {};
 $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 

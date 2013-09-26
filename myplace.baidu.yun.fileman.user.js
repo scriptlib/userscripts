@@ -3,11 +3,11 @@
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
-// @version     1
+// @version     1.001
 // ==/UserScript==
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = $myPlace.jQuery || unsafeWindow.$;
+var $ = unsafeWindow.$ || $myPlace.jQuery;
 $myPlace.baidu = $myPlace.baidu || {};
 $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 
