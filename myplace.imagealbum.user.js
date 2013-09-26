@@ -68,6 +68,13 @@
 // @include http*://colorbird.com/*
 // @include http*://*.tistory.com/*
 // @include http*://www.facebook.com/*
+// @include http://www.oisinbosoft.com/*
+// @include http://www.arzon.jp/*
+// @version 1.002
+//Changelog
+//	2013-09-27
+//		Add support for oisinbosoft.com
+//		Add support for arzon.jp
 // ==/UserScript==
 
 
@@ -1329,6 +1336,18 @@ if(!XRZPanel.init()) return false;
 		'attr_replace',
 		[/(\/|\/p\d+x\d+\/|\/s\d+x\d+)([^\/]+)_n\.jpg$/,'/$2_o.jpg'],
 	//	[/((s|p)\d+x\d+\/)?([^\/]+)_n\.jpg$/,'$3_o.jpg'],
+		{dialog:true}
+	);
+    $R('oisinbosoft\\.com',
+       ['#detail_simg a','href'],
+       'attr_set',
+       null,
+       {dialog:true}
+     );
+	 $R('arzon\\.jp',
+		['.img a','href'],
+		'atrr_set',
+		null,
 		{dialog:true}
 	);
 	//****************************************************

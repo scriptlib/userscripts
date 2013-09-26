@@ -4,7 +4,7 @@
 // @description 百度云网盘分享转存
 // @include     http://yun.baidu.com/share/*
 // @include     http://pan.baidu.com/share/*
-// @version     1.002
+// @version     1.001
 // ==/UserScript==
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
