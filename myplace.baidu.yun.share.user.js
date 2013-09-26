@@ -4,7 +4,7 @@
 // @description 百度云网盘分享转存
 // @include     http://yun.baidu.com/share/*
 // @include     http://pan.baidu.com/share/*
-// @version     1.001
+// @version     1.002
 // ==/UserScript==
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
@@ -53,7 +53,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		},
 		saveFiles : function(path,f) {
 			var tasks = [];
-			f = f || FileUtils.SHARE_DATAS.currentChacheData;
+			//f = f || FileUtils.SHARE_DATAS.currentChacheData;
 			if((!f) || f.length < 1) {
 				message(_L('No tasks.'),2);
 				return;

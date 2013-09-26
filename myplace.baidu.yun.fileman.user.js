@@ -3,7 +3,7 @@
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.001
+// @version     1.002
 // ==/UserScript==
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
@@ -52,7 +52,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		},
 		saveFiles : function(type,path,f,onebyone) {
 			var tasks = [];
-			f = f || FileUtils.SHARE_DATAS.currentChacheData;
+			//f = f || FileUtils.SHARE_DATAS.currentChacheData;
 			if((!f) || f.length < 1) {
 				message(_L('No tasks.'));
 				return;
