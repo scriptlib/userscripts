@@ -4,7 +4,11 @@
 // @description 百度云网盘分享转存
 // @include     http://yun.baidu.com/share/*
 // @include     http://pan.baidu.com/share/*
-// @version     1.001
+// @version     1.003
+// @grant none
+// Change Log
+//	2013-09-27
+//		Hide docwrapper when dialog is open
 // ==/UserScript==
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
@@ -240,8 +244,14 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			if(!self.SaveDialog) {
 				self.SaveDialog = new yun.SaveDialog(default_path,default_exp);
 			}
+            var docwraper=$('#docWraper');
+            docwraper.length && docwraper.hide();
 			self.SaveDialog.setVisible(true);
+            self.SaveDialog.OnCancel = function() {
+                docwraper.length && docwraper.show();
+            }
 			self.SaveDialog.OnConsent = function(source,target) {
+                docwraper.length && docwraper.show();
 				yun.Config.write(idPath,target);
 				yun.Config.write(idExp,source);
 				self.getList(what,function(all) {

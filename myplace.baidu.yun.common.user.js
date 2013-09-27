@@ -6,7 +6,12 @@
 // @include     http://pan.baidu.com/share/*
 // @include     http://yun.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.001
+// @version     1.002
+// @grant none
+// Change Logs
+//	2013-09-27
+//		Grant NONE
+//		Add OnCancel event for SaveDialog
 // ==/UserScript==
 
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
@@ -185,7 +190,10 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					'<div class="hr"></div>'+
 					'</div>';
 			var element = $(html)[0];
-			$(element).appendTo($('#' + c._mMsgContentId));				
+			$(element).appendTo($('#' + c._mMsgContentId));
+            c._mOnCancel = function() {
+            	c.OnCancel && c.OnCancel(c);
+            }
 			c._mOnConsent = function() {
 				source = readValue('sd_source');
 				target = fixpath(readValue('sd_target'));
@@ -195,6 +203,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					return c.OnConsent(source,target);
 				}
 			}
+            c._mUI.pane.style.zIndex=12500;
 			var btn = $('#sd_button');
 			var dd;
 			if(disk.ui.MoveSaveDialog) {
@@ -204,6 +213,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 						FileUtils._mMoveSaveDialog =  new disk.ui.MoveSaveDialog();
 						dd._mMoveSaveDialog = FileUtils._mMoveSaveDialog;
 					}
+                    dd._mMoveSaveDialog._mUI.pane.style.zIndex=12501;
 					dd._mMoveSaveDialog.onConsent = function (D) {
 							$('#sd_target').attr('value',D);
 							c.setVisible(true);
