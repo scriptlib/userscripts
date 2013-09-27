@@ -2,12 +2,16 @@
 // @name           myplace.jquery
 // @namespace      eotect@myplace
 // @description    $myPlace.jQuery
-// @version		   1.1
+// @version		   1.11
 // @include        *
 // @require			http://code.jquery.com/jquery-1.10.2.min.js
 // @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
+// @grant 		none
 // ==/UserScript==
 
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 

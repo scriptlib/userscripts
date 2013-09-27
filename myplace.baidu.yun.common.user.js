@@ -6,14 +6,18 @@
 // @include     http://pan.baidu.com/share/*
 // @include     http://yun.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.002
+// @version     1.003
 // @grant none
 // Change Logs
 //	2013-09-27
-//		Grant NONE
+//		Grant NONE, unsafeWindow => window;
 //		Add OnCancel event for SaveDialog
 // ==/UserScript==
 
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = unsafeWindow.$ || $myPlace.jQuery;
@@ -283,6 +287,17 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		},
 		Cache : {
 		},
+        UI : {
+            getHeader : function() {
+                var a = $('.homeheader');
+                if(a && a[0]) {
+                    return a[0];
+                }
+                else {
+                    return undefined;
+                }
+            }
+        },
 		Downloader : function(props) {
 			var self = this;
 			this.props = props;
@@ -316,4 +331,23 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			
 		},
 	};
+	$(document).ready(function() {
+		var header = d.yun.UI.getHeader();
+		if(header) {
+			$myPlace.panel.addButton(
+				{
+					html: "-Header",
+					set: function(){header.style.display='block';}
+				},
+				function() {
+					return header.style.display != 'none';           
+				},
+				{
+					html: "+Header",
+					set: function(){header.style.display='none';}
+				}
+			);
+			$myPlace.panel.show();
+		}
+	});
 })($myPlace.baidu);

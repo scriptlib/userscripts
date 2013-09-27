@@ -1,9 +1,15 @@
 // ==UserScript==
 // @name           myplace.utils.prevnext
-// @namespace      xiaoranzzz@myplace
+// @namespace      eotect@myplace
 // @description    previous and next page
 // @include        http*
+// @version			1.01
+// @grant 		none
 // ==/UserScript==
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 
 
 ( function() {

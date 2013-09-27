@@ -3,9 +3,12 @@
 // @namespace   eotect@myplace
 // @description 百度专辑批理转存
 // @include     http://yun.baidu.com/pcloud/album/*
-// @version     1.001
+// @version     1.002
 // ==/UserScript==
 
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = unsafeWindow.$ || $myPlace.jQuery;

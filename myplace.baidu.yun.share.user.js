@@ -10,6 +10,10 @@
 //	2013-09-27
 //		Hide docwrapper when dialog is open
 // ==/UserScript==
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = unsafeWindow.$ || $myPlace.jQuery;

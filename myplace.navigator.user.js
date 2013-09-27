@@ -4,10 +4,13 @@
 // @description    $myPlace.navigator
 // @include        http*
 // @exclude			*google.*
-// @version			1.0
+// @version			1.01
+// @grant 		none
 // ==/UserScript==
 
-
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = $myPlace.jQuery || unsafeWindow.$;

@@ -3,8 +3,18 @@
 // @namespace   eotect@myplace
 // @description Bookmarks shower
 // @include     http*#photo-url:http*
-// @version     1
+// @version     1.02
+// @grant 		none
 // ==/UserScript==
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+unsafeWindow.$myPlace = $myPlace;
+if(!$myPlace.utils) $myPlace.utils = {};
+
+$myPlace.utils.showbookmark = function(){
 	var href = document.location.href;
 	if(!href) return;
 	var m = href.match(/^(http[s:].+)#photo-url:(http[s:].+)$/);
@@ -16,3 +26,5 @@
 	div += 'source: <a href="' + m[1] + '">'
 	div += m[1] + '</a>';
 	document.body.innerHTML = div;
+}
+$myPlace.utils.showbookmark();

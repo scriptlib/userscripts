@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name           myplace.utils.formfiller
 // @namespace      eotect@myplace
-// @version			1.0
+// @version			1.01
 // @description    Sites registration helper
 // @include        https://www.dropbox.com/register
 // @include        https://*dropbox.com/referrals*
@@ -20,7 +20,12 @@
 // @include		http://i.xunlei.com/register.html
 // @include 	https://reg.91.com/WebStaticPage/regforkx.html
 // @include		http://reg.email.163.com/unireg/call.do?cmd=register.entrance*
+// @grant 		none
 // ==/UserScript==
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 
 
 function start() {

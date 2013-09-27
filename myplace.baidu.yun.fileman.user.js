@@ -3,8 +3,13 @@
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.002
+// @version     1.003
+// @grant 		none
 // ==/UserScript==
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = unsafeWindow.$ || $myPlace.jQuery;

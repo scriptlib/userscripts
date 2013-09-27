@@ -4,8 +4,13 @@
 // @description		MyPlace Google Mod
 // @include			*://www.google.*
 // @include			*://google.*
+// @version			1.01
+// @grant 		none
 // ==/UserScript==
 
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = $myPlace.jQuery || unsafeWindow.$;

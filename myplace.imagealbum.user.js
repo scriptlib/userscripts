@@ -70,19 +70,21 @@
 // @include http*://www.facebook.com/*
 // @include http://www.oisinbosoft.com/*
 // @include http://www.arzon.jp/*
-// @version 1.002
+// @version 1.003
 //Changelog
 //	2013-09-27
 //		Add support for oisinbosoft.com
 //		Add support for arzon.jp
+// @grant 		none
 // ==/UserScript==
 
-
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 var $ = $myPlace.jQuery || unsafeWindow.$;
 var XRZPanel = $myPlace.panel;
-if(!XRZPanel.init()) return false;
 
 
 (function(_){

@@ -6,7 +6,13 @@
 // @include		 http*://*/1register78.php*
 // @include		 http*://*mod=register*
 // @include			http*://*/forum/*register*.php*
+// @grant 		none
 // ==/UserScript==
+
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
+
 function start() {
 var $ = unsafeWindow.$;
 var damnass='a' + 'b' + 'sfreed' + 'o' + 'm';

@@ -3,9 +3,13 @@
 // @namespace      eotect@myplace
 // @description    $myPlace.panel
 // @include        http*
-// @version        1.0
+// @version        1.01
+// @grant	none
 // ==/UserScript==
 
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 
@@ -16,9 +20,9 @@ unsafeWindow.$myPlace = $myPlace;
 	const SEPARATOR_TEXT="&nbsp;&nbsp;";// &nbsp; &nbsp;";
 	const PANEL_CONTROL_ID = 'xrlin_panel_control';
 		function  debugPrint(text) {
-			return;
+			//return;
 			if(console) {
-				//console.log("Eotect Golbal Panle:" + text)
+				console.log("Eotect Golbal Panle:" + text)
 			}
 			else {
 				//GM_log("Eotect Golbal Panel:" + text);
@@ -37,7 +41,7 @@ unsafeWindow.$myPlace = $myPlace;
 		init : function() {
 			debugPrint("Start on " + document.location);
 			if(parent != window) {
-				//debugPrint("In a frame? Stop here!");
+				debugPrint("In a frame? Stop here!");
 				return false;
 			}
 			if(document.getElementById(PANEL_ID)) {
@@ -177,18 +181,19 @@ unsafeWindow.$myPlace = $myPlace;
 		},
 		addButton	: function (state1,cond,state2) {
 			var element = document.createElement('span');
+			element.innerHTML = state1.html;
 			element.style.cursor = 'pointer';
-			var test = cond();
-			if(test) {
-				element.innerHTML = state2.html;
-				element.addEventListener('click',
-					function() {state2.set(element,test);});
-			}
-			else {
-				element.innerHTML = state1.html;
-				element.addEventListener('click',
-					function() {state1.set(element,test);});
-			}
+			element.addEventListener('click',function(){
+				var test = cond();
+				if(test) {
+					element.innerHTML = state2.html;
+					state2.set(element,test);
+				}
+				else {
+					element.innerHTML = state1.html;
+					state1.set(element,test);
+				}
+			});
 			this.addSpace();
 			this.add(element);
 			return element;
@@ -214,7 +219,8 @@ unsafeWindow.$myPlace = $myPlace;
 			this.DOMParent.removeChild(this.DOMPanel);
 		}
 	}
-	XRZPanel.init();
-	_.panel = XRZPanel;
+	var a = XRZPanel;
+	a.init();
+	_.panel = a;
 })($myPlace);
 
