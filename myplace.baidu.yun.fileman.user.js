@@ -3,10 +3,12 @@
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.003
+// @version     1.010
 // @grant 		none
+// Changelog
+//	2013-09-28
+//		Add support for magnet links
 // ==/UserScript==
-
 if(!unsafeWindow) {
 	unsafeWindow = window;
 }
@@ -118,6 +120,60 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				return callback(data);
 			}
 			return data;
+		},
+		saveMagnet:	function(path,str) {
+			var url = "http://pan.baidu.com/rest/2.0/services/cloud_dl?bdstoken="+FileUtils.bdstoken;
+ 			var a1=str.indexOf('xt=urn:btih:');
+			if(a1==-1){
+				message(_L('Error: Invalid URI.'),2);
+			}
+			else {
+				message(_L('Adding task...'),1);
+				var a2=str.indexOf("&",a1);
+				if(a2==-1){
+					str=str.substring(a1+12);
+				}
+				else{
+					str=str.substring(a1+12,a2);
+				}
+				str=str.toUpperCase();
+				$.getJSON("http://pan.baidu.com/api/categorylist?channel=chunlei&category=7&num=1&page=1",function(json){
+				$.post(url,	{
+						method:"add_task",
+						app_id:"250528",
+						source_path:json.info[0].path,
+						file_sha1:str,
+						save_path:path,
+						type:"2"
+					},
+					function(data,status){
+						if(status=="success") {
+							message(_L('Task added.'));
+						}
+						else {
+							message(_L('Error: Failed to add task.'),2);
+						}
+					}
+				)});
+			}
+		},
+		openMagnetDownloader : function() {
+			
+			var self = this;
+			var d = new yun.URIDialog(
+				{
+					id:'magnet_savedin',
+					value:FileUtils.getDirMgr().getDir()
+				},
+				{
+					id:'magnet_uri',
+					value:''
+				}
+			);
+			d.OnConsent = function(path,uri) {
+				self.saveMagnet(path,uri);
+			}
+			d.setVisible(true);
 		},
 	}
 	
@@ -334,6 +390,12 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		}
 		var self = yun.LinkSaver;
 		var buttons = [
+			{
+				label:	_L('Magnet downloader'),
+				click:	function(){
+					return yun.Fileman.openMagnetDownloader();
+				},
+			},
 			{
 				label:	_L('Move'),
 				click:	function(){

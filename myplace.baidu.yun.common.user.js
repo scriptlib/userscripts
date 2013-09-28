@@ -6,9 +6,11 @@
 // @include     http://pan.baidu.com/share/*
 // @include     http://yun.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.003
+// @version     1.010
 // @grant none
-// Change Logs
+// Changelog
+//	2013-09-28
+//		Add support for magnet links
 //	2013-09-27
 //		Grant NONE, unsafeWindow => window;
 //		Add OnCancel event for SaveDialog
@@ -71,6 +73,14 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			'Copy 1by1': '\u9010\u4e2a\u590D\u5236',
 			'Move 1by1': '\u9010\u4e2a\u79FB\u52A8',
 			'Refresh':'\u5237\u65b0',
+			'Error: Invalid URI.':'\u9519\u8bef\uff1aURI\u683c\u5f0f\u4e0d\u6b63\u786e\u3002',
+			'Adding task...':'\u6b63\u5728\u6dfb\u52a0\u4efb\u52a1\u3002\u3002\u3002',
+			'Task added.':'\u6210\u529f\u6dfb\u52a0\u4efb\u52a1\u3002',
+			'Error: Failed to add task.':'\u9519\u8bef\uff1a\u6dfb\u52a0\u4efb\u52a1\u5931\u8d25\u3002',
+			'Magnet downloader':'\u4e0b\u8f7d\u78c1\u529b\u94fe',
+			'Save in:':'\u4fdd\u5b58\u4f4d\u7f6e\uff1a',
+			'URI:':'\u94fe\u63a5(URI)\uff1a',
+			
 		},
 		_L : function(text,arg1,arg2,arg3,arg4){
 			var maps = d.yun.LocaleStringMaps;
@@ -171,6 +181,73 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				};
 			}
 			return r;
+		},
+		URIDialog : function(path,uri) {
+			if(!path) path= {value:"/Incoming",id:'uridialog_path'};
+			if(!uri)  uri = {value:'',id:'uridialog_uri'};
+			var c;
+			if(disk.ui.SelectDialog) {
+				c = new disk.ui.SelectDialog();
+			}
+			else {
+				c = new disk.ui.AlertDialog();
+			}
+			var html = '<div class="saveDialog" style="display:block;text-align:left">'+
+					'<span style="display:block">'+
+					d.yun._L('Save in:')+
+					'</span><input style="height:20px;width:280px;margin-left:10px;" id="' +
+					path.id +
+					'" type=text value="' + 
+					path.value + 
+					'" class="target_path">' + 
+					'<button style="display:inline;margin-left:20px" type="button" class="" id="sd_button">' + d.yun._L('Select...') + '</button>' +
+					'<br/>' +
+					'<span style="display:block">'+
+					d.yun._L('URI:')+
+					'</span>' +
+					'<input style="height:20px;width:280px;margin-left:10px;" id="'+
+					uri.id + 
+					'" type=text value="' + 
+					uri.value + 
+					'" class="source_selection">' +
+					'<div class="hr"></div>'+
+					'</div>';
+			var element = $(html)[0];
+			$(element).appendTo($('#' + c._mMsgContentId));
+            c._mOnCancel = function() {
+            	c.OnCancel && c.OnCancel(c);
+            }
+			c._mOnConsent = function() {
+				var pvalue = fixpath(readValue(path.id));
+				var uvalue = readValue(uri.id);
+				setValue(path.id,pvalue);
+				c.setVisible(false);
+				if(c.OnConsent) {
+					return c.OnConsent(pvalue,uvalue);
+				}
+			}
+            c._mUI.pane.style.zIndex=12500;
+			var btn = $('#sd_button');
+			var dd;
+			if(disk.ui.MoveSaveDialog) {
+				btn.click(function() {
+					var dd = FileUtils;
+					if(!dd._mMoveSaveDialog) {
+						FileUtils._mMoveSaveDialog =  new disk.ui.MoveSaveDialog();
+					}
+                    dd._mMoveSaveDialog._mUI.pane.style.zIndex=12501;
+					dd._mMoveSaveDialog.onConsent = function (D) {
+							$('#' + path.id).attr('value',D);
+							c.setVisible(true);
+					}
+					c.setVisible(false);
+					dd._mMoveSaveDialog.setVisible(true);
+				});
+			}
+			else {
+				btn.hide();
+			}
+			return c;
 		},
 		SaveDialog : function(path,regexp,album) {
 			if(!path) path="/Incoming";
