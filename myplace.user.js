@@ -3,14 +3,21 @@
 // @namespace      eotect@myplace
 // @description    $myPlace
 // @include        *
-// @version		 	1.0
-// @grant			none
+// @version		 	1.1
+// @grant none
 // ==/UserScript==
-if(!unsafeWindow) {
-	unsafeWindow = window;
+
+
+if(typeof unsafeWindow == 'undefined') {
+    var unsafewindow  = window;
+    window.unsafeWindow = window;
 }
-var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+if(typeof $myPlace == 'undefined') {
+	var $myPlace = unsafeWindow.$myPlace || {};
+}
 unsafeWindow.$myPlace = $myPlace;
+
+
 
 (function(_){
 	_._models = {};
