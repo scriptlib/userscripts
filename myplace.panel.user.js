@@ -20,7 +20,7 @@ unsafeWindow.$myPlace = $myPlace;
 	const SEPARATOR_TEXT="&nbsp;&nbsp;";// &nbsp; &nbsp;";
 	const PANEL_CONTROL_ID = 'xrlin_panel_control';
 		function  debugPrint(text) {
-			//return;
+			return;
 			if(console) {
 				console.log("Eotect Golbal Panle:" + text)
 			}
