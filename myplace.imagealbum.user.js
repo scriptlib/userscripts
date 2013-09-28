@@ -83,7 +83,7 @@ if(!unsafeWindow) {
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = $myPlace.jQuery || unsafeWindow.$;
+var $ = unsafeWindow.$ || $myPlace.jQuery;
 var XRZPanel = $myPlace.panel;
 
 
