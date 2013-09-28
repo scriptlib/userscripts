@@ -13,7 +13,7 @@ if(!unsafeWindow) {
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = $myPlace.jQuery || unsafeWindow.$;
+var $ = unsafeWindow.$ || $myPlace.jQuery;
 $myPlace.mod = $myPlace.mod || {};
 var panel=$myPlace.panel;
 

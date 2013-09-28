@@ -6,7 +6,6 @@
 // @include        *
 // @require			http://code.jquery.com/jquery-1.10.2.min.js
 // @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
-// @grant 		none
 // ==/UserScript==
 
 if(!unsafeWindow) {

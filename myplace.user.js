@@ -4,8 +4,11 @@
 // @description    $myPlace
 // @include        *
 // @version		 	1.0
+// @grant			none
 // ==/UserScript==
-
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 
