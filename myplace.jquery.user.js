@@ -2,10 +2,13 @@
 // @name           myplace.jquery
 // @namespace      eotect@myplace
 // @description    $myPlace.jQuery
-// @version		   1.11
+// @version		   1.12
 // @include        *
 // @require			http://code.jquery.com/jquery-1.10.2.min.js
 // @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
+// Changes log
+//	2013-09-29
+//		Remove @grant none, Run in sandbox.		
 // ==/UserScript==
 
 if(!unsafeWindow) {
