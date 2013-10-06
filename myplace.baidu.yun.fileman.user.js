@@ -75,8 +75,9 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 			}
 			else {
-				var limit = 30;
 				var files_count = f.length;
+				var flimit = Math.floor(files_count/5);
+				var limit = flimit<30 ? flimit : 30;
 				var pages_count = files_count / limit;
 				if(pages_count*limit<files_count) pages_count++;
 				for(var i=0;i<pages_count;i++) {
@@ -101,18 +102,12 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			});
 		},
 		getList: function (what,callback) {
-			var data;
-			
-			if(FileUtils.SHARE_DATAS) {
-				data = FileUtils.SHARE_DATAS.currentChacheData;
-			}
-			else {
-				var _ = FileUtils._mInfiniteGridView || FileUtils._mInfiniteListView;
-				if(_) {
-					data =  _.getCheckedItems();
-					if(data.length<1) {
-						data = _._mElementsData;
-					}
+			var data;			
+			var _ = (FileUtils.getViewMode() == 1 ? FileUtils._mInfiniteGridView : FileUtils._mInfiniteListView);
+			if(_) {
+				data =  _.getCheckedItems();
+				if(data.length<1) {
+					data = _.getElementsData();
 				}
 			}
 			yun.Cache.FilemanList = data;
