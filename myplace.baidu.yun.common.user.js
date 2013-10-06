@@ -5,8 +5,10 @@
 // @include     http://yun.baidu.com/share/*
 // @include     http://pan.baidu.com/share/*
 // @include     http://yun.baidu.com/pcloud/album/*
+// @include		http://pan.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.010
+// @include     http://pan.baidu.com/s/*
+// @version     1.013
 // @grant none
 // Changelog
 //	2013-09-28
@@ -58,6 +60,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			'Done'	: "\u5B8C\u6210",
 			'Save To' : "\u4FDD\u5B58\u5230",
 			"tasks done." : "\u4e2a\u4efb\u52a1\u5b8c\u6210\u3002",
+			"$1 tasks done." : '\u5b8c\u6210$1\u4e2a\u4efb\u52a1\u3002',
 			','	:	"\uff0c",
 			'Request share list' : '\u8BF7\u6C42\u6587\u4EF6\u5217\u8868\uFF1A',
 			'Page'	: '\u9875',
@@ -80,6 +83,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			'Magnet downloader':'\u4e0b\u8f7d\u78c1\u529b\u94fe',
 			'Save in:':'\u4fdd\u5b58\u4f4d\u7f6e\uff1a',
 			'URI:':'\u94fe\u63a5(URI)\uff1a',
+			'Quick Save':'\u5feb\u901f\u4fdd\u5b58',
 			
 		},
 		_L : function(text,arg1,arg2,arg3,arg4){
@@ -408,23 +412,4 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			
 		},
 	};
-	$(document).ready(function() {
-		var header = d.yun.UI.getHeader();
-		if(header) {
-			$myPlace.panel.addButton(
-				{
-					html: "-Header",
-					set: function(){header.style.display='block';}
-				},
-				function() {
-					return header.style.display != 'none';           
-				},
-				{
-					html: "+Header",
-					set: function(){header.style.display='none';}
-				}
-			);
-			$myPlace.panel.show();
-		}
-	});
 })($myPlace.baidu);
