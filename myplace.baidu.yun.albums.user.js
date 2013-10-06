@@ -3,7 +3,9 @@
 // @namespace   eotect@myplace
 // @description 百度专辑批理转存
 // @include     http://yun.baidu.com/pcloud/album/*
-// @version     1.002
+// @include		http://pan.baidu.com/pcloud/album/*
+// @include     http://pan.baidu.com/s/*
+// @version     1.005
 // ==/UserScript==
 
 if(!unsafeWindow) {
@@ -22,8 +24,8 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 	var RestApi = disk.api.RestAPI;
 	var Utilities = unsafeWindow.Utilities;
 	var Messager = new yun.Messager('li');
-	function message(text) {
-		return Messager.say(text);
+	function message(t,m) {
+		return Messager.say.apply(t,m);
 	}
 	var _L = yun._L;
 	
@@ -38,7 +40,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				_ = _obj.shareid || _obj;
 			Utilities.useToast({
 				toastMode: disk.ui.Toast.MODE_LOADING,
-				msg: info + "\u6b63\u5728\u4fdd\u5b58\uff0c\u8bf7\u7a0d\u5019&hellip;",
+				msg: "\u6b63\u5728\u4fdd\u5b58 \"" + info +"\"\uff0c\u8bf7\u7a0d\u5019&hellip;",
 				sticky: true,
 				position: disk.ui.Panel.TOP
 			});
@@ -113,7 +115,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			}
 			yun.Utils.doTasks(this.saveFile,tasks,0,3000,function(task,idx,tasks){
 				if(task) {
-					message("[" + (idx+1) + "/" + tasks.length + "] " + _L('Saving') + ' ' + task.filename + ' ...');
+					message("[" + (idx+1) + "/" + tasks.length + "] " + _L('Saving') + ' ' + task.filename + ' ...',1);
 				}
 				else {
 					message(idx + _L("tasks done."));
