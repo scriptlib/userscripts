@@ -75,7 +75,6 @@
 //	2013-09-27
 //		Add support for oisinbosoft.com
 //		Add support for arzon.jp
-// @grant 		none
 // ==/UserScript==
 
 if(!unsafeWindow) {
@@ -83,7 +82,7 @@ if(!unsafeWindow) {
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = unsafeWindow.$ || $myPlace.jQuery;
+var $ = $myPlace.jQuery || unsafeWindow.$;
 var XRZPanel = $myPlace.panel;
 
 

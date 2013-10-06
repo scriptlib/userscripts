@@ -6,6 +6,7 @@
 // @include		 http*://*/1register78.php*
 // @include		 http*://*mod=register*
 // @include			http*://*/forum/*register*.php*
+// @version		1.0
 // @grant 		none
 // ==/UserScript==
 
@@ -128,7 +129,7 @@ if(href.match(/fromuser=/) || fromuser) {
     fill_form(random_name(),"","123456");
 }
 else {
-    fill_form(damnname + , damnname + "@gmail.com",damnass);
+    fill_form(damnname , damnname + "@gmail.com",damnass);
 }
 
 var button_summit = get_field(document.getElementsByTagName("button"),"regsubmit"); 
