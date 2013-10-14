@@ -5,6 +5,8 @@
 // @description  enter something useful
 // @include     http://pan.baidu.com/pcloud/friendpage*
 // @include     http://pan.baidu.com/share/*
+// @include     http://yun.baidu.com/pcloud/friendpage*
+// @include     http://yun.baidu.com/share/*
 // @copyright  2012+, eotect
 // @grant none
 // ==/UserScript==

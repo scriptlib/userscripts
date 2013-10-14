@@ -2,14 +2,11 @@
 // @name        myplace.baidu.yun.share.link
 // @namespace   eotect@myplace
 // @description myplace.baidu.yun.share.link
-// @include     http://yun.baidu.com/share/*
-// @include     http://pan.baidu.com/share/*
+// @include     http://yun.baidu.com/share/link?*
+// @include     http://pan.baidu.com/share/link?*
 // @include     http://pan.baidu.com/s/*
-// @version     0.2
+// @version     0.3
 // @grant none
-// Change Log
-//	2013-09-27
-//		Hide docwrapper when dialog is open
 // ==/UserScript==
 
 
@@ -80,6 +77,7 @@
 		var pos = $('#barCmdViewList')[0];
 		var btn;
 		if(pos) {
+			pos = pos.parentNode;
 			btn = $('<li><button style="display:inline;height:29px;margin-right:5px" ' +
 				'title="' + _L('Quick Save') + '" href="javascript:;" class="two-pix-btn">' + 
 				_L('Quick Save') + 	'</button></li>');

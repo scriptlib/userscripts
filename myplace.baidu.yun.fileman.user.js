@@ -166,6 +166,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 			);
 			d.OnConsent = function(path,uri) {
+				alert(uri);
 				self.saveMagnet(path,uri);
 			}
 			d.setVisible(true);

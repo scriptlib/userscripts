@@ -5,9 +5,13 @@
 // @include     http://yun.baidu.com/share/*
 // @include     http://pan.baidu.com/share/*
 // @include     http://pan.baidu.com/s/*
-// @version     1.01
+// @version     1.03
 // @grant none
 // Change Log
+//	2013-10-09
+//		Add hooks $myPlace.baidu.yun.share.HACKPATH
+//	2013-10-07
+//		Add range expression selector. (Range:)
 //	2013-09-27
 //		Hide docwrapper when dialog is open
 // ==/UserScript==
@@ -73,6 +77,9 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 	
 				for(var j=0;j<f[i].filelist.length;j++) {
 					//fl.push(decodeURIComponent(f[i].filelist[j].path));
+					if(typeof $myPlace.baidu.yun.share.HACKPATH == 'function') {
+						f[i].filelist[j].path = $myPlace.baidu.yun.share.HACKPATH(f[i].filelist[j].path);
+					}
 					fl.push(f[i].filelist[j].path);
 				}
 				tasks.push({
@@ -83,6 +90,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					filename:f[i].title,
 				});
 			}
+			yun.Cache.Tasks = tasks;
 			yun.Utils.doTasks(this.saveFile,tasks,0,3000,function(task,idx,tasks){
 				if(task) {
 					message("[" + (idx+1) + "/" + tasks.length + "] " + _L('Saving') + ' ' + task.filename + ' ...',1);
@@ -117,7 +125,31 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					if(!source) {
 						files = all;
 					}
-					else {
+                    else if(source.match(/^\s*Range:/)) {
+                        var rangeexp = source.match(/^\s*Range:(.+?)\s*$/);
+                        rangeexp = rangeexp[1];
+                    	var exps = rangeexp.split(/\s+/);
+                        for(var i=0;i<exps.length;i++) {
+                            var exp = exps[i];
+                            if(exp.match(/^\s*\d+\s*$/)) {
+                                var n = exp.match(/^\s*(\d+)\s*$/);
+                                if(n && n[1] && n[1]>0 && n[1]<=all.length){
+                                    files.push(all[n[1]-1]);
+                                    console.log('Range match ' + all[n[1]-1].title);
+                                }
+                            }
+                            else if(exp.match(/^\s*\d+-\d+\s*$/)) {
+                                var n = exp.match(/^\s*(\d+)-(\d+)\s*$/);
+                                if(n && n[1] && n[2]) {
+                                    for(var i=n[1];i<=n[2] && i<=all.length;i++) {
+                                        files.push(all[i-1]);
+                                        console.log('Range match ' + all[i-1].title);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else {
 						var r = new RegExp(source);
 						for(var i=0;i<all.length;i++) {
 							if(all[i].feed_type == 'album') {
@@ -145,6 +177,5 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		},
 	};
 })($myPlace.baidu.yun);
-
 
 

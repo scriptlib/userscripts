@@ -4,7 +4,7 @@
 // @description myplace.baidu.yun.share.home
 // @include     http://yun.baidu.com/share/home?*
 // @include     http://pan.baidu.com/share/home?*
-// @version     0.2
+// @version     0.3
 // @grant none
 // Change Log
 //	2013-09-27
@@ -81,6 +81,10 @@
 		},
 	};
 	$(document).ready(function(){
+        //var elements = $('inline-file-col');
+        //for(var i=0;i<elements.length;i++) {
+        	//$('<span>' + (i+1) + '</span>').insertBefore(elements[i]);
+        //}
 		var pos = $('#barCmdViewList')[0];
 		if(pos) {
 			pos = $(pos.parentNode);
@@ -101,7 +105,7 @@
 			btn2.insertBefore(pos);		
 		}
 		else {
-			alert("Error bad script, myplace.baidu.yun.share.home");
+			//alert("Error bad script, myplace.baidu.yun.share.home");
 			return;
 		}
 	});
