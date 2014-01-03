@@ -70,7 +70,7 @@
 // @include http*://www.facebook.com/*
 // @include http://www.oisinbosoft.com/*
 // @include http://www.arzon.jp/*
-// @version 1.003
+// @version 1.004
 //Changelog
 //	2013-09-27
 //		Add support for oisinbosoft.com

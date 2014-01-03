@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       myplace.baidu.yun.panel
 // @namespace  eotect@myplace
-// @version    0.1
+// @version    0.11
 // @description  enter something useful
 // @include     http://pan.baidu.com/pcloud/friendpage*
 // @include     http://pan.baidu.com/share/*
@@ -32,9 +32,11 @@
     var followsPage = "http://pan.baidu.com/pcloud/friendpage?type=follow&uk=" + pageUK;
     var fansPage = "http://pan.baidu.com/pcloud/friendpage?type=fans&uk=" + pageUK;
 	var homePage = "http://pan.baidu.com/share/home?uk=" + pageUK;
-    if($('#share_nofound_des').length || href.match(/\/pcloud\/friendpage/)) {		
+/*
+	if($('#share_nofound_des').length || href.match(/\/pcloud\/friendpage/)) {		
         	$myPlace.panel.add($('<a href="/share/home?uk=' + pageUK + '">' + pageUK + '</a>')[0],1); 
 	}
+*/
 	$myPlace.panel.addSpace();
 	$myPlace.panel.add($('<a href="' + homePage + '">Home</a>')[0],1);
     $myPlace.panel.add($('<a href="' + followsPage + '">Follows</a>')[0],1);
