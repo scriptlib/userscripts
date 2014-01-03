@@ -8,6 +8,7 @@
 // @include		http://pan.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
+// @include     http://yun.baidu.com/s/*
 // @version     1.013
 // @grant none
 // Changelog
@@ -347,7 +348,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		Config : {
 			read	: function(key) {
 				var r;
-				if(Page.getCookie) {
+				if(!unsafeWindow.localStorage) {
 					r = Page.getCookie(key);
 					
 				}
@@ -358,7 +359,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				return r;
 			},
 			write	: function(key,value) {
-				if(Page.setCookie) {
+				if(!unsafeWindow.localStorage) {
 					return Page.setCookie(key,value,100000);
 				}
 				else {

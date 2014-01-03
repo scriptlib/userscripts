@@ -69,6 +69,12 @@
 			else {
 				data = FileUtils.SHARE_DATAS.currentChacheData;	
 				for(var i=0;i<data.length;i++) {
+					if((!data[i].filelist) && data[i].operation.filelist) {
+						data[i].filelist = data[i].operation.filelist;
+					}
+					if(!data[i].filelist) {
+						continue;
+					}
 					for(var j=0;j<data[i].filelist.length;j++) {
 							data[i].filelist[j].path = decodeURIComponent(data[i].filelist[j].path);
 					}

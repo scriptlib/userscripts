@@ -181,17 +181,17 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 						_.setVisible(false);
 						FileUtils.getLocalCache().removeAll();
 						FileUtils.getLocalCache().removeCategorys();
-						disk.ui.DocReader.clearAllDocData();
+						//disk.ui.DocReader.clearAllDocData();
 						if (FileUtils.getModule() == "category") {
 							FileUtils.triggerType(FileUtils.getType());
 						} else {
 							if (FileUtils.inSearchMode()) {
-								disk.ui.DocReader.clearAllDocData();
+								//disk.ui.DocReader.clearAllDocData();
 								FileUtils.issueProxyLoading(true, false);
 								var G = FileUtils.resolveCurrentDirKey();
 								FileUtils.loadDir(G == FileUtils.ROOT_ID ? "" : G);
 							} else {
-								disk.ui.DocReader.clearAllDocData();
+								//disk.ui.DocReader.clearAllDocData();
 								FileUtils.issueProxyLoading(true, false);
 								FileUtils.loadDir(FileUtils.resolveCurrentDirKey());
 							}

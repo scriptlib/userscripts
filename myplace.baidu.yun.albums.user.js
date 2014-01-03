@@ -5,6 +5,7 @@
 // @include     http://yun.baidu.com/pcloud/album/*
 // @include		http://pan.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/s/*
+// @include     http://yun.baidu.com/s/*
 // @version     1.005
 // ==/UserScript==
 

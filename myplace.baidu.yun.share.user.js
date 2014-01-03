@@ -5,6 +5,7 @@
 // @include     http://yun.baidu.com/share/*
 // @include     http://pan.baidu.com/share/*
 // @include     http://pan.baidu.com/s/*
+// @include     http://yun.baidu.com/s/*
 // @version     1.03
 // @grant none
 // Change Log
@@ -150,7 +151,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
                         }
                     }
                     else {
-						var r = new RegExp(source);
+						var r = new RegExp(source,'i');
 						for(var i=0;i<all.length;i++) {
 							if(all[i].feed_type == 'album') {
 								albumCount++;

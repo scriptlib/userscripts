@@ -1011,7 +1011,7 @@ var XRZPanel = $myPlace.panel;
 		['img','src'],
 		'attr_replace',
 		[/\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/,'/large/$2.jpg'],
-		 {dialog:true,no_cache_selector:true}
+		 {dialog:true,no_cache_selector:true,inline:false}
 	);
 
 
