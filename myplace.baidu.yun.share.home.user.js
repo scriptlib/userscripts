@@ -4,7 +4,7 @@
 // @description myplace.baidu.yun.share.home
 // @include     http://yun.baidu.com/share/home?*
 // @include     http://pan.baidu.com/share/home?*
-// @version     1.31
+// @version     0.3
 // @grant none
 // Change Log
 //	2013-09-27

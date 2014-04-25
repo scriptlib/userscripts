@@ -7,9 +7,10 @@
 // @include     http://yun.baidu.com/pcloud/album/*
 // @include		http://pan.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/disk/home*
+// @include     http://yun.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.014
+// @version     1.013
 // @grant none
 // Changelog
 //	2013-09-28

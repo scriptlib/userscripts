@@ -70,7 +70,7 @@
 // @include http*://www.facebook.com/*
 // @include http://www.oisinbosoft.com/*
 // @include http://www.arzon.jp/*
-// @version 1.004
+// @version 1.003
 //Changelog
 //	2013-09-27
 //		Add support for oisinbosoft.com
@@ -309,13 +309,13 @@ var XRZPanel = $myPlace.panel;
 			autoOpen:false, 
 			'width': dialogSize,
 			'height':(window.innerHeight)*0.9,
-			position:'center'
+			position:'center',
 		});
 		div.dialog('open');
 		return false;
 	}
 	function showImageInline(element,data) {
-		var $ = unsafeWindow.$;
+		//var $ = unsafeWindow.$;
 		if(element.getAttribute('XRLIN_HAVE_PARENT')) {
 			$(element).prev().show();
 			$(element).hide();
@@ -458,7 +458,8 @@ var XRZPanel = $myPlace.panel;
 			'title':'Images Album',
 			'model':true
 		});
-		
+		var dialog = $(nvPanel).dialog('widget');
+		dialog.zIndex('32768');
 		//document.body.insertBefore(nvPanel,document.body.firstChild);
 		if(!hidePanel) {
 			$(nvPanel).dialog('open');
@@ -1182,26 +1183,28 @@ var XRZPanel = $myPlace.panel;
 				/:\/\/(www\.google|google)\./);
 	*/
 	M.reg(/:\/\/(www\.google|google)\./,
-		['.images_table img','src'],
+		['.rg_di','class'],
 		function(elm,src) {
-			var jelm = elm.parentNode.parentNode;
-			var href = elm.parentNode.href;
+			var link = elm.getElementsByTagName('a')[0];
+			var href = link.href;
 			if(!href) {
 				return false;
 			}
+			GM_log(href);
 			var match = href.match(/imgurl=([^&]*)&imgrefurl=([^&]*)&/);
 			if(!match) {
 				return false;
 			}
-			var text =  jelm.parentNode.textContent.replace(/\s*\.\.\.\s*\d+\s*×\s*\d+\s*-.*$/,'');
+			var text =  elm.textContent;//jelm.parentNode.textContent.replace(/\s*\.\.\.\s*\d+\s*×\s*\d+\s*-.*$/,'');
+			var tmatch = text.match(/"s":"([^"]+)"/);
 			return {
 				src: unescape(match[1]),
 				href: unescape(match[2]),
-				text: text,
+				text: tmatch[1],
 			};
 		},
 		[],
-		{dialog:true,no_button:true}
+		{dialog:true,no_button:true,inline:false}
 	);
 	M.reg(/http:\/\/photo\.xgo\.com\.cn\/ablum\//,
 		['img','src'],
@@ -1394,7 +1397,7 @@ var XRZPanel = $myPlace.panel;
 
 	if(!DOCHREF) {
 	}
-	else if(DOCHREF.match(/weibo\.com|t\.qq\.com/)) {
+	else if(DOCHREF.match(/weibo\.com|t\.qq\.com|google\.com/)) {
 		window.addEventListener('load',
 			function() {
 				loadAll();

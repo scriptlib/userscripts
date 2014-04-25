@@ -6,7 +6,7 @@
 // @include     http://pan.baidu.com/share/link?*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.04
+// @version     0.3
 // @grant none
 // ==/UserScript==
 
@@ -65,7 +65,11 @@
 			}
 			for(var i=0;i<data.length;i++) {
 				for(var j=0;j<data[i].filelist.length;j++) {
-						data[i].filelist[j].path = decodeURIComponent(data[i].filelist[j].path);
+						try {
+							data[i].filelist[j].path = decodeURIComponent(data[i].filelist[j].path);
+						} catch(e) {
+							message(e + ": " + data[i].filelist[j].path,2)
+						}
 				}
 			}
 			if(typeof callback == 'function') {

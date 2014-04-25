@@ -3,7 +3,8 @@
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
-// @version     1.011
+// @include     http://yun.baidu.com/disk/home*
+// @version     1.010
 // @grant 		none
 // Changelog
 //	2013-09-28
@@ -76,7 +77,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			}
 			else {
 				var files_count = f.length;
-				var flimit = Math.floor(files_count/5);
+				var flimit = Math.floor(files_count/5) + 1;
 				var limit = flimit<30 ? flimit : 30;
 				var pages_count = files_count / limit;
 				if(pages_count*limit<files_count) pages_count++;

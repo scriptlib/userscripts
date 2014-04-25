@@ -6,7 +6,7 @@
 // @include     http://pan.baidu.com/share/*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.04
+// @version     1.03
 // @grant none
 // Change Log
 //	2013-10-09
