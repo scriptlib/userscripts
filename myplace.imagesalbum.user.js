@@ -65,6 +65,8 @@
 // @include http*://www.moko.cc/*
 // @include http*://photo.blog.sina.com.cn/*
 // @include https://www.google.com/bookmarks/*
+// @include https://www.google.com.hk/bookmarks/*
+// @include https://www.google.co.jp/bookmarks/*
 // @include http*://www.colorbird.com/*
 // @include http*://colorbird.com/*
 // @include http*://*.tistory.com/*
@@ -73,6 +75,10 @@
 // @include http://www.arzon.jp/*
 // @include http://www.sungirlbaby.com/*
 // @include http://www.amazon.co.jp/*
+// @include http://www.weipai.cn/*
+// @include http://my.hupu.com/*
+// @include http://www.flickr.com/*
+// @include https://www.flickr.com/*
 // @version 1.003
 //Changelog
 //	2013-09-27
@@ -503,7 +509,12 @@
 	http://fondospantalla.org/thumbnails2/-sabrina-ferilli-sabrina-ferilli-1.jpg
 	http://fondospantalla.org/chicas-s/sabrina-ferilli/sabrina-ferilli-1.jpg
 	*/
-
+	M.reg(/http:\/\/blog\.sina\.com\.cn/,
+		['img','real_src'],
+		'attr_replace',
+		[/\/(orignal|bmiddle|middle|small|mw690)\//,'/orignal/'],
+		{dialog:true}
+	);
 	M.addImgSite(
 		/(small|bmiddle|middle|orignal)\//,"orignal/",false,
 		/photo.blog\.sina\.com\.cn/
@@ -700,12 +711,7 @@
 		[/_thumb\.|_mthumb\./,'.'],
 		{dialog:true}
 	);
-	M.reg(/http:\/\/blog\.sina\.com\.cn/,
-		['img','real_src'],
-		'attr_replace',
-		[/\/(orignal|bmiddle|middle|small)\//,'/orignal/'],
-		{dialog:true}
-	);
+
 
 	M.reg(/http:\/\/www\.bobx\.com/,
 		['a img','src'],
@@ -736,10 +742,13 @@
 			}
 			var text =  elm.textContent;//jelm.parentNode.textContent.replace(/\s*\.\.\.\s*\d+\s*×\s*\d+\s*-.*$/,'');
 			var tmatch = text.match(/"s":"([^"]+)"/);
+			if(!tmatch) {
+				tmatch = text.match(/"pt":"([^"]+)/);
+			}
 			return {
 				src: unescape(match[1]),
 				href: unescape(match[2]),
-				text: tmatch ? tmatch[1] : '',
+				text: (tmatch ? tmatch[1] : ''),
 			};
 		},
 		[],
@@ -792,16 +801,27 @@
 		[/\/mblogpic\/([^\/]+)\/160/,'/mblogpic/$1/2000'],
 		{dialog:true, no_cache_selector:true}
 	);
-
+	$R('moko\.cc',
+		['input','value'],
+		'attr_match',
+		['(.*\.jpg$)',1],
+		{dialog:true}
+	);
 	$R('moko\\.cc',
 		['.picBox>img','src2'],
 		'attr_set',
 		null,
 		{dialog:true}
 	);
+	$R('moko\\.cc',
+		['img.mbSPic','src2'],
+		'attr_replace',
+		['_mokoshow_','_cover_'],
+		{dialog:true}
+	);
 
-	$R('google.com\/bookmarks',
-		['#search>span','id'],
+	$R('google\.(?:com|com\.hk|co\.jp)\/bookmarks',
+		['table.result','id'],
 		function(elm,id) {
 			var image = {description:'',tags:'',text:'',src:'',href:'', title:''};
 			var r = elm.textContent.match(/^(.+)\xA0+-\xA0+[^\/:#\?=&]+\xA0+-\xA0+Edit\xA0+Remove\s*\[(.+)\][^\[\]]+$/);
@@ -818,12 +838,13 @@
 					}
 				}
 			}
-			var links = elm.innerHTML.match(/href="\.\/url\?[^"]*?url=([^"&]+)/);
-		/*
-			alert(elm.innerHTML);
-			alert(links);
-			fail();
-		*/
+			var links = elm.innerHTML.match(/_mark\('([^\']+)'/);
+			
+		
+			// alert(elm.innerHTML);
+			// alert(links);
+			// fail();
+		
 			if(links) {
 				var full = unescape(links[1]);
 				var m = full.match(/^(.+)(?:#|%23)photo-url:(.+)$/);
@@ -838,10 +859,11 @@
 			if(image.description && image.description.match(/^\s*Via http/i)) {
 				image.description = '';
 			}
-			image.text = image.title + "\n" + image.description;
+			image.text = image.title;
+			image.desc = image.description;
 			if(image.tags) {
 				image.tags = image.tags.replace(/,?\s*unsorted bookmarks\s*/i,'');
-				image.text += "[" + image.tags + "]";
+				image.desc = "[" + image.tags + "]\n" + image.desc;
 			}
 			if(image.src) {
 				id = id.replace(/^[^\d]+/,'')
@@ -850,6 +872,9 @@
 				elm.insertBefore(idx,elm.firstChild);// parentNode.insertBefore(idx,elm);
 				image.src = image.src.replace(/moko\.hk/,'moko.cc');
 				image.src = image.src.replace(/livedoor\.blogimg\.jp/g,'image.blog.livedoor.jp');
+				return image;
+			}
+			else if(image.href) {
 				return image;
 			}
 			return null;
@@ -904,6 +929,42 @@
 		'attr_replace',
 		[/\._SL\d+_\.jpg/,'.jpg'],
 		{dialog:true}
+	);
+	$R('weipai\.cn',
+		['div img','src'],
+		'attr_match',
+		['(.*v\.weipai\.cn.*)',1],
+		{dialog:true}
+	);
+	$R('my\.hupu\.com',
+		['img','src'],
+		'attr_replace',
+		[/small\.jpg/,'\.jpg'],
+		{dialog:true}
+	);
+	$R(	
+		'flickr\.com',
+		['.low-res-photo,.pc_img,.Sets','data-defer-src'],
+		function(elm,attr) {
+			if(!attr) {
+				attr = elm.getAttribute('src');
+				if(!attr) {
+					attr = elm.getAttribute('style');
+					GM_log('style:' + attr);
+					if(attr) {
+						var m = attr.match(/background-image:\s*url\s*\(\s*([^\)]+?)\s*\)/i);
+						attr = m ? m[1] : '';
+						attr = attr.replace(/^['"](.+)['"]$/,'$1');
+					}
+				}
+			}
+			if(attr) {
+				attr = attr.replace(/(?:_z|_s|_q|_n|_c|)\.jpg$/,'_b.jpg');
+				return {src:attr};
+			}			
+		},
+		null,
+		{dialog:true,loadmode:'Interative'}
 	);
 	//****************************************************
 	//Weak Rules

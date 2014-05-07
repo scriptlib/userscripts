@@ -22,7 +22,7 @@ if(!$myPlace.lib) {
 
 (function(_){
 
-	debugPrint("lib.datashower: [Start]" + Date());
+	debugPrint("[Start]" + Date());
 	var XRZPanel = $myPlace.panel;
 	var DOCHREF = document.location.href;
 	var ELMLINKS = document.getElementsByTagName('a');
@@ -35,14 +35,14 @@ if(!$myPlace.lib) {
 	const PAGESIZE = 25;
 	const PAGESIZEMIN = 5;
 	const INDEXSTYLE=' style="text-decoration:underline;cursor:pointer;color:darkblue;" ';
-	const ITEMSTYLE =' style="text-align:left;color:darkblue;padding-left:20px;" ';
-	const IMAGESTYLE='  style="border:1px solid #000000;background-color:#EEEEEE;padding:2px;margin-bottom:20px;" ';
+	
 	const CURITEMSTYLE  =' style="color:black;" ';
 	const IMAGEONLOAD = ' onload="var MAXWIDTH = window.innerWidth*0.97;if (this.width>MAXWIDTH) this.width = MAXWIDTH;" ';
 	const ALBUM_TEXT_OPENED = '<strong style="color:red;">*Album</strong>';
 	const ALBUM_TEXT_CLOSED = '<font style="text-decoration:underline">Album</font>';
 	
 	var  DATAMINER;
+	var ALBUMNAME;
 	var INTERACTIVE_MODE = false;
 	//UTILS
 	function debugPrint(text) {
@@ -72,7 +72,7 @@ if(!$myPlace.lib) {
 		var target = image.target;
 		var pt = target.parentNode || target;//document.body;
 		var pHref = pt.href || document.location.href || src;
-		var pText = pt.text || pt.textContent || document.title;
+		var pText = pt.textContent || document.title;
 		if(!pText) {
 			pText = getBasename(pHref);
 		}
@@ -84,15 +84,17 @@ if(!$myPlace.lib) {
 				href = target.href || pHref;
 			}
 			if(!text) {
-				text = target.text || pText;
+				text = target.textContent || pText;
 			}
 			image.href = href;
 			image.text = text;
 			return image;
 		}
-		if(!image.inline) {
-			image.dialog = true;
-		}
+		
+		// if(!image.inline) {
+			// image.dialog = true;
+		// }
+		
 		var replace = image['replace'];
 		var top = pt.parentNode;
 		var tagname1 = target.tagName.toLowerCase();
@@ -108,14 +110,14 @@ if(!$myPlace.lib) {
 		}
 		else if(tagname1 == 'a') {
 			if(!href) href = target.href;
-			if(!text) text = target.text;
+			if(!text) text = target.textContent;
 		}
 		else {
 			if(!href) {
 				href = target.href || pHref;
 			}
 			if(!text) {
-				text = target.text || target.textContent || pText;
+				text = target.textContent || pText;
 			}
 		}
 		image.href = href;
@@ -135,7 +137,7 @@ if(!$myPlace.lib) {
 			container.appendChild(target);
 		}
 		//debugPrint(target.tagName + "[inline]" + inline + "\n" + src + "\n" + href + "\n" + text + "\n");
-		if(!image.no_click) {
+		if(image.click) {
 			var et = image.inLink ? pt : target;
 			et.setAttribute("href",'javascript:void(0)');
 			et.setAttribute("target",'');
@@ -285,13 +287,49 @@ if(!$myPlace.lib) {
 		idxPanel.appendChild(sep);
 	}
 	function appendItem(item,idx,contPanel) {
-		var itemLink = document.createElement("div");
-		itemLink.style.textAlign="left";
-		itemLink.innerHTML='<a' +  ITEMSTYLE + 'href="' + item.href + '">' + idx + "." +  item.text + '</a>'; 
-		contPanel.appendChild(itemLink);
-		var itemImage = document.createElement("div");
-		itemImage.innerHTML='<img' + IMAGESTYLE + IMAGEONLOAD +  'src="' + item.src + '"></img>' 
-		contPanel.appendChild(itemImage);
+		
+		var ITEMSTYLE,ITEMTITLESTYLE,ITEMINDEXSTYLE,ITEMLINKSTYLE,ITEMDESCSTYLE,ITEMIMAGESTYLE;
+		
+		ITEMSTYLE = 'text-align:left;padding-bottom:40px;';
+		ITEMTITLESTYLE = 'text-align:left;color:darkblue;padding-left:20px;font-weight:bold';
+		ITEMINDEXSTYLE = 'font-size:30pt';
+		ITEMDESCSTYLE = '';
+		ITEMIMAGESTYLE = '';
+	
+		var itemElm = document.createElement('div');
+		itemElm.setAttribute('class','datashower_item');
+		itemElm.setAttribute('style',ITEMSTYLE);
+		
+		var itemTitle = document.createElement('div');
+		itemTitle.setAttribute('class','datashower_itemtitle');
+		itemTitle.setAttribute('style',ITEMTITLESTYLE);
+		var title1 = '<span style="' + ITEMINDEXSTYLE + '">#' + idx + '. </span>';
+		var title2 = item.text ? item.text : '';
+		if(item.href) {
+			itemTitle.innerHTML = title1 + '<a href="' + item.href + '">' + title2 + '</a>';
+		}
+		else {
+			itemTitle.innerHTML = title1 + title2;
+		}
+		itemElm.appendChild(itemTitle);
+		
+		//Desc
+		if(item.desc) {
+			var itemDesc = document.createElement('div');
+			itemDesc.setAttribute('class','datashower_itemdesc');
+			itemDesc.setAttribute('style',ITEMDESCSTYLE);
+			itemDesc.innerHTML = '<p><blockquote>' + item.desc + '</blockquote></p>';
+			itemElm.appendChild(itemDesc);
+		}
+		//Content
+		if(item.src) {
+			var itemImage = document.createElement("div");
+			itemImage.setAttribute('class','datashower_itemimage');
+			itemImage.setAttribute('style',ITEMIMAGESTYLE);
+			itemImage.innerHTML='<img' + IMAGEONLOAD +  'src="' + item.src + '"></img>' 
+			itemElm.appendChild(itemImage);
+		}
+		contPanel.appendChild(itemElm);
 	}
 	function createIndexPanel(idxPage,count,nvPanel) {
 		if (count>1) {
@@ -454,27 +492,27 @@ if(!$myPlace.lib) {
 			window.addEventListener('load',
 				function() {
 					loadAll();
-					debugPrint("lib.datashower: [End]" + Date());
+					debugPrint("[End]" + Date());
 				},false
 			);
 		}
 		else if(Interative) {
 			INTERACTIVE_MODE = true;
 			loadAll();
-			debugPrint("lib.datashower: [End]" + Date());
+			debugPrint("[End]" + Date());
 		}
 		else if(Manually) {
 		}
 		else {
 			INTERACTIVE_MODE = false;
 			loadAll();
-			debugPrint("lib.datashower: [End]" + Date());
+			debugPrint("[End]" + Date());
 		}
 	}
 	function loadAll() {
 		DOCIMAGES = DATAMINER.collect(DOCIMAGES);	
 		unsafeWindow.DOCIMAGES = DOCIMAGES;
-		debugPrint("Get " + DOCIMAGES.length + " result");
+		debugPrint("Get " + DOCIMAGES.length + (DOCIMAGES.length>1 ? " images" : ' image'));
 		for(var i=0;i<DOCIMAGES.length;i++) {
 			DOCIMAGES[i] = post_process(DOCIMAGES[i]);
 		}
@@ -554,12 +592,13 @@ if(!$myPlace.lib) {
 	//window.addEventListener("load", loadAll,true);
 	
 	_.datashower = {
-		'init'	: 	function(miner) {
+		'init'	: 	function(miner,albumname) {
 			DATAMINER = miner;
+			ALBUMNAME = albumname;
 		},
 		'start'	: 	function() {
 				return start();
-			}
+			},
 		'load'	:	function(reload){
 				if(reload) {
 					reloadAll();
@@ -570,7 +609,7 @@ if(!$myPlace.lib) {
 		},
 	};
 
-})($myPlace);
+})($myPlace.lib);
 
 
 

@@ -4,11 +4,13 @@
 // @description myplace.baidu.yun.share.home
 // @include     http://yun.baidu.com/share/home?*
 // @include     http://pan.baidu.com/share/home?*
-// @version     0.3
+// @version     0.4
 // @grant none
 // Change Log
+//	2014-05-04
+//		[功能:保存全部]增加重复项目的检测和删除.
 //	2013-09-27
-//		Hide docwrapper when dialog is open
+//		[界面]打开保存界面的时候，隐藏docwrapper.
 // ==/UserScript==
 
 
@@ -25,6 +27,38 @@
 	var FileUtils = unsafeWindow.FileUtils;
 	var _L = yun.share._L;
 	var message = yun.share.message;
+	function DeleteDuplicated(lists) {
+		var newlist = [];
+		var records = {};
+		var ignored = 0;
+		for(var i=0;i<lists.length;i++) {
+			if(!lists[i].title) {
+				newlist.push(lists[i]);
+			}
+			else if(!lists[i].filelist) {
+				newlist.push(lists[i]);
+			}
+			else if(!lists[i].filelist.length) {
+				newlist.push(lists[i]);
+			}
+			else {
+				var KEY = lists[i].filelist[0].path + lists[i].filelist.length;
+				if(records[lists[i].title] && records[lists[i].title] == KEY ) {
+					ignored++;
+					//console.log('[' + ignored + ']Duplicated item ignored: "' + lists[i].title + '".');
+					continue;
+				}
+				else {
+					records[lists[i].title] = KEY;
+					newlist.push(lists[i]);
+				}
+			}
+		}
+		if(lists.length > newlist.length) {
+			console.log('Original list contains ' + lists.length + ' items, ' + ignored + ' items duplicated, list reduced to ' + newlist.length + ' items.');
+		}
+		return newlist;
+	}
 	yun.share.home = {
 		getFiles : function(what,callback){
 			if(what && what == "all") {
@@ -32,39 +66,96 @@
 					callback(yun.Cache.AllFileList);
 					return yun.Cache.AllFileList;
 				}
+
 				var count = FileUtils.SHARE_DATAS.loadedAllCount;
 				var limit = FileUtils.SHARE_DATAS.pageSize
 				var pages = Math.floor(count/limit);
 				if(limit*pages<=count) pages++;
 				var lists = [];
-				function getPage(page) {
+				var page_start = 1;
+				var page_end = pages;
+				var page_exp = prompt(_L("Select pages range...") + '(1 - ' + pages + ')',"1 - " + pages); 
+				if(page_exp) {
+					var m = page_exp.match(/^\s*(\d+)\s*-\s*(\d+)$/);
+					if(m) {
+						if((+m[1]) > (+m[2])) {
+							page_start = +m[2];
+							page_end = +m[1];
+						}
+						else {
+							page_start = +m[1];
+							page_end = +m[2];
+						}
+					}
+					else if(m = page_exp.match(/^\s*(\d+)\s*$/)) {
+						page_start = +m[1];
+						page_end = +m[1];
+					}
+				}
+				if(page_start < 1) {
+					page_start = 1;
+				}
+				if(page_end < 1) {
+					page_end = 1;
+				}
+				console.log('Page:' + page_start + ', ' + page_end);
+				function getPages(currentPage,pageTo,cb) {
+					if(!currentPage) {
+						currentPage = 1;
+					}
+					if(currentPage < 1) {
+						currentPage = 1;
+					}
+					if(currentPage > pageTo) {
+						lists = DeleteDuplicated(lists);
+						yun.Cache.AllFileList = lists;
+						if(cb && typeof(cb) == 'function') {
+							cb(lists);
+						}
+					}
+					else {
+						message('[' + currentPage + '/' + page_end + '] ' + _L("Request share list") + _L("Page") + currentPage + ' ...',1);
+						getPage(currentPage,function(nextPage){
+							if(nextPage) {
+								getPages(+1+currentPage,pageTo,cb);
+							}
+						});
+					}
+					return lists;
+				}
+				function getPage(page,cb) {
 					var start=(page-1)*limit;
 					if(start+limit>count) {
 						limit = count - start;
 					}
-					message('[' + page + '/' + pages + '] ' + _L("Request share list") + _L("Page") + page + ' ...',1);
-						yun.GetShareList(start,limit,function(data){
-							for(var i=0;i<data.records.length;i++) {
-								if(data.records[i].filelist) {
-									for(var j=0;j<data.records[i].filelist.length;j++) {
-										data.records[i].filelist[j].path = decodeURIComponent(data.records[i].filelist[j].path);
-									}								
-								}
-								lists.push(data.records[i]);
-							}
-							if(start+limit>=count) {
-								yun.Cache.AllFileList = lists;
-								if(typeof callback == 'function') {
-									callback(lists);
-								}
+					yun.GetShareList(start,limit,function(data){
+							if(!(data && data.records)) {
+								message(_L("Request share list") + _L("Page") + page + ' , ' + _L('Error') + ' ' + 'return nothing',1);
 							}
 							else {
-								getPage(page+1);
+								for(var i=0;i<data.records.length;i++) {
+									if(data.records[i].filelist) {
+										for(var j=0;j<data.records[i].filelist.length;j++) {
+											data.records[i].filelist[j].path = decodeURIComponent(data.records[i].filelist[j].path);
+										}								
+									}
+									lists.push(data.records[i]);
+								}
 							}
+							//if(start+limit>=count) {
+								//DeleteDuplicated(lists);
+								//yun.Cache.AllFileList = lists;
+								if(cb && typeof(cb) == 'function') {
+									cb(1+page);
+								}
+							//}
 							return lists;
-						});			
+					});	
+					return lists;
 				}
-				return getPage(1);
+				//return getPages(35,39,callback); //DEBUG TESTING
+				getPages(+page_start,+page_end,callback);
+				return lists;
 			}
 			else {
 				data = FileUtils.SHARE_DATAS.currentChacheData;	

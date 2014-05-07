@@ -315,7 +315,7 @@ if(!$myPlace.lib) {
 		};
 		return this;
 	}
-	_.dataMiner = dataMiner;
+	_.dataminer = dataMiner;
 //DATA MINER END
 })($myPlace.lib);
 

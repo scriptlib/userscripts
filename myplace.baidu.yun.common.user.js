@@ -86,6 +86,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			'Save in:':'\u4fdd\u5b58\u4f4d\u7f6e\uff1a',
 			'URI:':'\u94fe\u63a5(URI)\uff1a',
 			'Quick Save':'\u5feb\u901f\u4fdd\u5b58',
+			'Select pages range...':'Select pages range...',
 			
 		},
 		_L : function(text,arg1,arg2,arg3,arg4){
