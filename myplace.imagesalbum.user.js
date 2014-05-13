@@ -79,6 +79,8 @@
 // @include http://my.hupu.com/*
 // @include http://www.flickr.com/*
 // @include https://www.flickr.com/*
+// @include http://tieba.baidu.com/*
+// @include http://pp.163.com/*
 // @version 1.003
 //Changelog
 //	2013-09-27
@@ -555,7 +557,7 @@
 	);
 
 	//http://ww3.sinaimg.cn/large/684e58a1tw1dgd30cyt75j.jpg
-	M.register(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.com|weitu\.sdodo\.com/,
+	M.register(/t\.sina\.com\.cn|weitu\.sdodo\.com/,
 		['img','src'],
 		'attr_replace',
 		[/\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/,'/large/$2.jpg'],
@@ -801,13 +803,13 @@
 		[/\/mblogpic\/([^\/]+)\/160/,'/mblogpic/$1/2000'],
 		{dialog:true, no_cache_selector:true}
 	);
-	$R('moko\.cc',
+	$R('moko\.cc\/[^\/]+$',
 		['input','value'],
 		'attr_match',
 		['(.*\.jpg$)',1],
 		{dialog:true}
 	);
-	$R('moko\\.cc',
+	$R('moko\\.cc\/post\/',
 		['.picBox>img','src2'],
 		'attr_set',
 		null,
@@ -942,29 +944,144 @@
 		[/small\.jpg/,'\.jpg'],
 		{dialog:true}
 	);
-	$R(	
-		'flickr\.com',
-		['.low-res-photo,.pc_img,.Sets','data-defer-src'],
-		function(elm,attr) {
-			if(!attr) {
-				attr = elm.getAttribute('src');
-				if(!attr) {
-					attr = elm.getAttribute('style');
-					GM_log('style:' + attr);
-					if(attr) {
-						var m = attr.match(/background-image:\s*url\s*\(\s*([^\)]+?)\s*\)/i);
-						attr = m ? m[1] : '';
-						attr = attr.replace(/^['"](.+)['"]$/,'$1');
-					}
-				}
+	
+	//@SITE http://www.flickr.com
+	function flickr_get_pic(ori,type) {
+		if(!type) type='b';
+		return ori.replace(/^https:/,'http:').replace(/(?:_z|_s|_q|_n|_c|_m|_b|)\.jpg$/,'_' + type + '.jpg');
+	}
+	function flickr_get_title(part) {
+		var title = document.title.replace(/\s*-\s*[^-]+$/,'');
+		part = part.replace(/^\s+/,'');
+		part = part.substr(0,24);
+		part = part.replace(/\s+$/,'');
+		return '' + (title ? (title + ' ') : '') + part;
+	}
+	$R('flickr\.com\/photos\/[^\/]+\/sets\/',
+		['img.pc_img','data-defer-src'],
+		function(elm,src) {
+			if(!src) {
+				src = elm.getAttribute('src');
 			}
-			if(attr) {
-				attr = attr.replace(/(?:_z|_s|_q|_n|_c|)\.jpg$/,'_b.jpg');
-				return {src:attr};
-			}			
+			if(!src) {
+				return;
+			}
+			return {
+				src:	flickr_get_pic(src,'b'),
+				text:	flickr_get_title(elm.parentNode.parentNode.parentNode.textContent),
+				href:	elm.parentNode.getAttribute('href'),
+			};
 		},
 		null,
-		{dialog:true,loadmode:'Interative'}
+		{no_cache_selector:true,loadmode:'Interative'}
+	);
+	(function(){
+		var flickr = {
+			site: 'flickr\.com',
+			attr: ['.low-res-photo,.Sets,.ui-display-image','data-defer-src'],
+			get: function(elm,attr,type) {
+				if(!attr) {
+					attr = elm.getAttribute('src');
+					if(!attr) {
+						attr = elm.getAttribute('style');
+						GM_log('style:' + attr);
+						if(attr) {
+							var m = attr.match(/background-image:\s*url\s*\(\s*([^\)]+?)\s*\)/i);
+							attr = m ? m[1] : '';
+							attr = attr.replace(/^['"](.+)['"]$/,'$1');
+						}
+					}
+				}
+				if(attr) {
+					attr = attr.replace(/(?:_z|_s|_q|_n|_c|_m|_b|)\.jpg$/,'_' + type + '.jpg');
+					return {src:attr};
+				}			
+				},
+				props: {dialog:true,loadmode:'Interative',no_cache_selector:true}
+		};
+		$R(
+			flickr.site,
+			flickr.attr,
+			function(elm,src) {
+				return flickr.get(elm,src,'b');
+			},
+			null,
+			flickr.props
+		);
+	})();
+
+	
+	//@SITE: http://tieba.baidu.com
+	$R(
+		'tieba\.baidu\.com',
+		['img.BDE_Image','src'],
+		'attr_replace',
+		[/forum\/[^\/]+\/sign=[^\/]+\//,'forum/pic/item/']
+	);
+	
+	//@SITE: http://weibo.com
+	/*
+		M.register(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.com|weitu\.sdodo\.com/,
+		['img','src'],
+		'attr_replace',
+		[,'/large/$2.jpg'],
+		 {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	);
+	*/
+	$R('weibo\.com',
+		['.WB_feed_type','mid'],
+		function(list,mid){
+			if(!mid) return;
+			
+			var $= $myPlace.jQuery;
+			
+			var detail = $(list).find('.WB_detail');
+			if(!detail) return;
+			
+			var imgelms = detail.find('img');
+			if(!imgelms) {
+				return;
+			}
+			
+			var jtext = detail.find('.WB_text');
+			if(!jtext) return;
+			var text = jtext.text().replace(/^[　\s]+/,'');
+			text = text.replace(/[　\s]+$/,'');
+			
+			
+			var jlink = detail.find('.WB_from .S_link2');;
+			if(!jlink) return;			
+			var href = jlink[0].href;
+					
+			var title = document.title;
+			title = title.replace(/\|[^\|]+$/,'');
+			
+			var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/;
+			var images = new Array();
+			for(var i=0;i<imgelms.length;i++) {
+				var src = imgelms[i].src;
+				if(src && src.match(imgexp)) {
+					images.push(src.replace(imgexp,'/large/$2.jpg'));
+				}
+			}
+			return {
+				images: images,
+				href:	href,
+				text:	text + ' - ' + title,
+			};
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	);
+	$R('pp\.163\.com',
+		['.pic-area img.z-tag','data-lazyload-src'],
+		function(elm,src) {
+			if(!src) {
+				src = elm.getAttribute('src');
+			}
+			if(!src) return;
+			return {text:document.title,src:src};
+		}
 	);
 	//****************************************************
 	//Weak Rules

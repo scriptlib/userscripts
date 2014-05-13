@@ -358,8 +358,13 @@ if(!$myPlace.lib) {
 	}
 
 	function ExportData(DOCIMAGES) {
-		var contPanel = document.createElement("ul");
-		contPanel.id = 'xz_imagesminer_data';
+		var id = 'xz_imagesminer_data';
+		var contPanel = document.getElementById(id);
+		if(contPanel) {
+			contPanel.parentNode.removeChild(contPanel);
+		}
+		contPanel = document.createElement("ul");
+		contPanel.id = id 
 		contPanel.style.display = 'none';
 		for(var curPage = 0;curPage<DOCIMAGES.length;curPage++) {
 			var li = document.createElement('li');
@@ -370,32 +375,49 @@ if(!$myPlace.lib) {
 			contPanel.appendChild(li);
 		}
 		document.body.appendChild(contPanel);
+		if($myPlace) {
+			if($myPlace.Cached) {
+				$myPlace.Cached.IMAGESMINER = DOCIMAGES;
+			}
+			else {
+				$myPlace.Cached = {
+					IMAGESMINER: DOCIMAGES,
+				}
+			}
+		}
 		//contPanel.id = contPanelId;
 	}
 
 	function loadPage(idxPage,hidePanel) {
 		if (idxPage>PAGECOUNT) return;
 		var nvPanel = document.getElementById("xrlin_imgAlbum");
-		if (nvPanel) nvPanel.parentNode.removeChild(nvPanel);
-		nvPanel = document.createElement("div");
-		nvPanel.id="xrlin_imgAlbum";
-	//    nvPanel.style.position = "fixed";
-	//    nvPanel.style.top = "100px";
-	//    nvPanel.style.height = "800";
-		//nvPanel.style.overFlow = "auto";
-	//    nvPanel.style.overFlow = "scroll";
-		with (nvPanel.style) {
-			textAlign="center";margin="0px";padding="4px";
-			backgroundColor="#F9FFE5";//opacity="0.95";
-		//    zIndex="32767";border="solid #000000 1px";
-		//    position="fixed";top="60px";left="2%";
-			overflow = "scroll";height="100%";
-			//width="95%";
+		if (nvPanel) {
+			nvPanel.removeChild(document.getElementById('myplace_datashower_nvholder'));
 		}
-		createIndexPanel(idxPage,PAGECOUNT,nvPanel); 
+		else {
+			nvPanel = document.createElement("div");
+			nvPanel.id="xrlin_imgAlbum";
+		//    nvPanel.style.position = "fixed";
+		//    nvPanel.style.top = "100px";
+		//    nvPanel.style.height = "800";
+			//nvPanel.style.overFlow = "auto";
+		//    nvPanel.style.overFlow = "scroll";
+			with (nvPanel.style) {
+				textAlign="center";margin="0px";padding="4px";
+				backgroundColor="#F9FFE5";//opacity="0.95";
+			//    zIndex="32767";border="solid #000000 1px";
+			//    position="fixed";top="60px";left="2%";
+				overflow = "scroll";height="100%";
+				//width="95%";
+			}
+		}
+		var nvHolder = document.createElement('div');
+		nvHolder.id = 'myplace_datashower_nvholder';
+		
+		createIndexPanel(idxPage,PAGECOUNT,nvHolder); 
 		var head = document.createElement("span");
 		head.innerHTML = "----<BR />";
-		nvPanel.appendChild(head);
+		nvHolder.appendChild(head);
 		var contPanel = document.createElement("ul");
 		contPanel.id = 'xz_imagesminer_show';
 		//contPanel.id = contPanelId;
@@ -412,8 +434,9 @@ if(!$myPlace.lib) {
 			appendItem(DOCIMAGES[curPage],curPage+1,li);
 			contPanel.appendChild(li);
 		}
-		nvPanel.appendChild(contPanel);
-		createIndexPanel(idxPage,PAGECOUNT,nvPanel); 
+		nvHolder.appendChild(contPanel);
+		createIndexPanel(idxPage,PAGECOUNT,nvHolder); 
+		nvPanel.appendChild(nvHolder);
 		//document.body.appendChild(nvPanel);
 		$(nvPanel).dialog({
 			'autoOpen':false,
@@ -466,7 +489,7 @@ if(!$myPlace.lib) {
 		for(var i=0;i<DATAMINER.MINER.length;i++) {
 			var miner = DATAMINER.MINER[i];
 			var site_exp = miner[0];
-			var property = miner[4];
+			var property = miner[4] || {};
 			if(site_exp && DOCHREF.match(site_exp)) {
 				if(property.loadmode) {
 					if(property.loadmode == 'Interative') {
@@ -509,14 +532,36 @@ if(!$myPlace.lib) {
 			debugPrint("[End]" + Date());
 		}
 	}
+	function cloneObject(a) {
+		var b = {};
+		for(c in a) {
+			b[c] = a[c];
+		};
+		return b;
+	}
 	function loadAll() {
-		DOCIMAGES = DATAMINER.collect(DOCIMAGES);	
-		unsafeWindow.DOCIMAGES = DOCIMAGES;
+		
+		var DATA = DATAMINER.collect();
+		for(var i=0;i<DATA.length;i++) {
+			if(DATA[i].images) {
+				for(var j=0;j<DATA[i].images.length;j++) {
+					var img = cloneObject(DATA[i]);
+					img.src = img.images[j];
+					img.images = null;
+					DOCIMAGES.push(img);
+				}
+			}
+			else {
+				DOCIMAGES.push(DATA[i]);
+			}
+		}
+		
 		debugPrint("Get " + DOCIMAGES.length + (DOCIMAGES.length>1 ? " images" : ' image'));
 		for(var i=0;i<DOCIMAGES.length;i++) {
 			DOCIMAGES[i] = post_process(DOCIMAGES[i]);
 		}
 		ExportData(DOCIMAGES);
+		unsafeWindow.DOCIMAGES = DOCIMAGES;
 		//storeData(DOCIMAGES,document);
 		PAGECOUNT = Math.floor((DOCIMAGES.length-1)/PAGESIZE) + 1;
 		if (PAGECOUNT<0) PAGECOUNT=0;

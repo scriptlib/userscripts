@@ -166,7 +166,7 @@ if(!$myPlace.lib) {
 				else {
 					elements = this.CACHED_JQUERY[jquery_selector];
 					if(!elements) {
-						elements = $(jquery_selector);
+						elements = $myPlace.$(jquery_selector);
 						this.CACHED_JQUERY[jquery_selector] = elements;
 					}
 				}
