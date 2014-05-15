@@ -803,7 +803,7 @@
 		[/\/mblogpic\/([^\/]+)\/160/,'/mblogpic/$1/2000'],
 		{dialog:true, no_cache_selector:true}
 	);
-	$R('moko\.cc\/[^\/]+$',
+	$R('moko\.cc\/[^\/]+\/?$',
 		['input','value'],
 		'attr_match',
 		['(.*\.jpg$)',1],
@@ -811,9 +811,19 @@
 	);
 	$R('moko\\.cc\/post\/',
 		['.picBox>img','src2'],
-		'attr_set',
-		null,
-		{dialog:true}
+		function(elm,src){
+			if(!src) {
+				src = elm.getAttribute('src');
+			}
+			if(!src) {
+				return;
+			}
+			var thumb = src.replace(/_src_/,'_thumb_');
+			return {
+				src: src,
+				thumb: thumb,
+			};
+		}
 	);
 	$R('moko\\.cc',
 		['img.mbSPic','src2'],
@@ -1045,8 +1055,8 @@
 			
 			var jtext = detail.find('.WB_text');
 			if(!jtext) return;
-			var text = jtext.text().replace(/^[　\s]+/,'');
-			text = text.replace(/[　\s]+$/,'');
+			var text = jtext.text().replace(/^[　\s\n\r]+/,'');
+			text = text.replace(/[　\s\n\r]+$/,'').replace(/[　\s\n\r]+/,' ','g')
 			
 			
 			var jlink = detail.find('.WB_from .S_link2');;
@@ -1061,13 +1071,14 @@
 			for(var i=0;i<imgelms.length;i++) {
 				var src = imgelms[i].src;
 				if(src && src.match(imgexp)) {
-					images.push(src.replace(imgexp,'/large/$2.jpg'));
+					images.push([src.replace(imgexp,'/large/$2.jpg'),src.replace(imgexp,'/bmiddle/$2.jpg')]);
 				}
 			}
 			return {
 				images: images,
 				href:	href,
-				text:	text + ' - ' + title,
+				text:	text.substr(0,32) + (text.length>32 ? ' ... - ' : '  - ') + title,
+				desc:	text,
 			};
 		},
 		null,
