@@ -303,14 +303,40 @@ if(!$myPlace.lib) {
 		var itemTitle = document.createElement('div');
 		itemTitle.setAttribute('class','datashower_itemtitle');
 		itemTitle.setAttribute('style',ITEMTITLESTYLE);
-		var title1 = '<span style="' + ITEMINDEXSTYLE + '">#' + idx + '. </span>';
-		var title2 = item.text ? item.text : '';
+		var title1 = document.createElement('span');
+		title1.innerHTML = '#' + idx;
+		title1.setAttribute('style',ITEMINDEXSTYLE);
+		title1.setAttribute('imgIndex',idx-1);
+			title1.addEventListener('click',function(e){
+				var idx = this.getAttribute('imgIndex');
+				var delm = document.getElementById('xz_imagesminer_images_' + idx);
+				if(delm) {
+					var se = delm.getAttribute('selected') || '0';
+					var tp = this.parentNode;
+					if(se == '1') {
+						tp.style.border = null;
+						tp.style.backgroundColor = null;
+						delm.setAttribute('selected',0);
+					}
+					else {
+						tp.style.border = '1px solid red';
+						tp.style.backgroudColor = '#000000';
+						delm.setAttribute('selected',1);
+					}
+				}
+			});
+		itemTitle.appendChild(title1);
+		
+		var title2 = document.createElement('span');
+		
+		var titleText = item.text ? item.text : '';
 		if(item.href) {
-			itemTitle.innerHTML = title1 + '<a href="' + item.href + '">' + title2 + '</a>';
+			title2.innerHTML = '<a href="' + item.href + '">' + titleText + '</a>';
 		}
 		else {
-			itemTitle.innerHTML = title1 + title2;
+			title2.innerHTML = titleText;
 		}
+		itemTitle.appendChild(title2);
 		itemElm.appendChild(itemTitle);
 		
 		//Desc
@@ -373,7 +399,10 @@ if(!$myPlace.lib) {
 		contPanel.style.display = 'none';
 		for(var curPage = 0;curPage<DOCIMAGES.length;curPage++) {
 			var li = document.createElement('li');
+			li.id = "xz_imagesminer_images_" + curPage;
+			li.setAttribute('imgIndex',curPage);
 			for(var prop in DOCIMAGES[curPage]) {
+
 				li.setAttribute(prop,DOCIMAGES[curPage][prop]);
 			}
 			//appendItem(DOCIMAGES[curPage],curPage+1,li);
@@ -424,6 +453,17 @@ if(!$myPlace.lib) {
 			return nvPanel;
 	}
 	
+	// function setData(sec,key,value) {
+		// var dataElement = document.getElementById('myplace_imagesalbum_data');
+		// if(!dataElement) return;
+		// var secElement = dataElement.getElementById(sec);
+		// if(!secElement) {
+			// secElement = document.createElement('li');
+			// dataElement.appendChild(secElement);
+		// }
+		// secElement.setAttribute(key, value.length ? value.join(",") : value);		
+	// }
+	
 	function loadPage(idxPage,hidePanel) {
 		if (idxPage>PAGECOUNT) return;
 		var nvPanel = document.getElementById("xrlin_imgAlbum");
@@ -432,6 +472,14 @@ if(!$myPlace.lib) {
 		}
 		else {
 			nvPanel = document.createElement("div");
+			
+			
+			// var dataElement = document.createElement('ul');
+			// dataElement.id = 'myplace_imagesalbum_data';
+			// dataElement.style.display = 'none';
+			// dataElement.innerHTML = '<li id="selected_item"><li>';
+			
+			// nvPanel.appendChild(dataElement);
 			
 			var ctrlBar = document.createElement('div');
 			ctrlBar.innerHTML = '<span style="float:left;text-align:center;width:95%">MyPlace Images  Album</span>';
@@ -492,7 +540,11 @@ if(!$myPlace.lib) {
 			//for(var prop in DOCIMAGES[curPage]) {
 			//	li.setAttribute(prop,DOCIMAGES[curPage][prop]);
 			//}
+			
 			appendItem(DOCIMAGES[curPage],curPage+1,li);
+			$(li).click(function(){
+				
+			});
 			contPanel.appendChild(li);
 		}
 		nvHolder.appendChild(contPanel);
@@ -601,12 +653,12 @@ if(!$myPlace.lib) {
 		};
 		return b;
 	}
-	var ALBUMINFO,ALBUMLENGTH;
+	var ALBUMINFO,ALBUMLENGTH,SELECTEDITEM;
 	function toggleAlbum() {
 		return showImgTable(ALBUMINFO,ALBUMLENGTH);
 	}
 	function loadAll() {
-		
+		//SELECTEDITEM = [];
 		var DATA = DATAMINER.collect();
 		for(var i=0;i<DATA.length;i++) {
 			if(DATA[i].images) {

@@ -803,13 +803,18 @@
 		[/\/mblogpic\/([^\/]+)\/160/,'/mblogpic/$1/2000'],
 		{dialog:true, no_cache_selector:true}
 	);
-	$R('moko\.cc\/[^\/]+\/?$',
+	$R('moko\.cc\/[^\/]+\.html$',
+		['img','src'],
+		'attr_match',
+		[/(.*html\.moko\.cc\/.+$)/,1]
+	);
+	$R('moko\.cc\/[^\/\?]+\/?$',
 		['input','value'],
 		'attr_match',
 		['(.*\.jpg$)',1],
 		{dialog:true}
 	);
-	$R('moko\\.cc\/post\/',
+	$R('moko\\.cc\/(?:weblogPostShowList|post\/)',
 		['.picBox>img','src2'],
 		function(elm,src){
 			if(!src) {
@@ -825,12 +830,12 @@
 			};
 		}
 	);
-	$R('moko\\.cc',
-		['img.mbSPic','src2'],
-		'attr_replace',
-		['_mokoshow_','_cover_'],
-		{dialog:true}
-	);
+	// $R('moko\\.cc',
+		// ['img.mbSPic','src2'],
+		// 'attr_replace',
+		// ['_mokoshow_','_cover_'],
+		// {dialog:true}
+	// );
 
 	$R('google\.(?:com|com\.hk|co\.jp)\/bookmarks',
 		['table.result','id'],
@@ -1056,7 +1061,7 @@
 			var jtext = detail.find('.WB_text');
 			if(!jtext) return;
 			var text = jtext.text().replace(/^[　\s\n\r]+/,'');
-			text = text.replace(/[　\s\n\r]+$/,'').replace(/[　\s\n\r]+/,' ','g')
+			text = text.replace(/[　\s\n\r]+$/,'').replace(/[　\s\n\r]+/,' ','mg')
 			
 			
 			var jlink = detail.find('.WB_from .S_link2');;
@@ -1078,7 +1083,7 @@
 				images: images,
 				href:	href,
 				text:	text.substr(0,32) + (text.length>32 ? ' ... - ' : '  - ') + title,
-				desc:	text,
+				desc:	(text.length > 32 ? text : ''),
 			};
 		},
 		null,
