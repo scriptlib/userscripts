@@ -4,7 +4,7 @@
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
 // @include     http://yun.baidu.com/disk/home*
-// @version     1.010
+// @version     1.014
 // @grant 		none
 // Changelog
 //	2013-09-28
@@ -23,7 +23,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 	var disk = unsafeWindow.disk;
 	var FileUtils = unsafeWindow.FileUtils;
 	var Page = unsafeWindow.Page;
-	var RestApi = disk.api.RestAPI;
+	
 	var Utilities = unsafeWindow.Utilities;
 	var Messager = new yun.Messager('li');
 	function message(text,mode) {
@@ -78,6 +78,9 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			else {
 				var files_count = f.length;
 				var flimit = Math.floor(files_count/5) + 1;
+				if(flimit < 5) {
+					flimit = 5;
+				}
 				var limit = flimit<30 ? flimit : 30;
 				var pages_count = files_count / limit;
 				if(pages_count*limit<files_count) pages_count++;
@@ -300,7 +303,9 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 						}
 						FileUtils.getLocalCache().removeAll();
 						FileUtils.getLocalCache().removeCategorys();
-						disk.ui.DocReader.clearAllDocData();
+						if(disk.ui.DocReader) {
+							disk.ui.DocReader.clearAllDocData();
+						}
 						_.pending(function () {
 							Utilities.useToast(B ? B : {
 								toastMode: disk.ui.Toast.MODE_SUCCESS,
@@ -329,14 +334,17 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 							sticky: true
 						});
 					} catch (H) {
+						
 						if (disk.DEBUG) {
 							console.log("error on move or copy files ", H.message);
 						}
-						Utilities.useToast({
-							toastMode: disk.ui.Toast.MODE_CAUTION,
-							msg: (D == disk.ui.MoveCopyDialog.MOVE ? "\u79fb\u52a8" : "\u590d\u5236") + "\u6587\u4ef6\u5931\u8d25\uff0c\u8bf7\u7a0d\u5019\u91cd\u8bd5",
-							sticky: false
-						});
+						if(!H.message.match(/disk.ui.DocReader/)) {
+							Utilities.useToast({
+								toastMode: disk.ui.Toast.MODE_CAUTION,
+								msg: (D == disk.ui.MoveCopyDialog.MOVE ? "\u79fb\u52a8" : "\u590d\u5236") + "\u6587\u4ef6\u5931\u8d25\uff0c\u8bf7\u7a0d\u5019\u91cd\u8bd5",
+								sticky: false
+							});
+						}
 					}
 					this._mPendingHighlights = null;
 				});
@@ -364,19 +372,12 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				yun.Config.write(idPath,target);
 				yun.Config.write(idExp,source);
 				self.getList(what,function(all) {
-					var files = [];
-					if(!source) {
-						files = all;
-					}
-					else {
-						var r = new RegExp(source);
-						for(var i=0;i<all.length;i++) {
-							var s = "" + (i+1) + "#" + all[i].server_filename;							
-							if(r.test(s)) {
-								files.push(all[i]);
-							}
+					var files = yun.Utils.pickFiles(
+						all,source,
+						function(item,idx) {
+							return "" + (idx+1) + "#" + item.server_filename;
 						}
-					}
+					);
 					message(_L("Get $1 tasks",files.length) + '.');
 					if(files.length > 0) {
 						self.saveFiles(what,target,files,arg1,arg2,arg3);
@@ -424,7 +425,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 			},
 		];
-		pos = $('#barCmdViewList')[0].parentNode;
+		pos = $('.list[node-type="btn-list"]')[0];//.parentNode;
 		for(var i=0;i<buttons.length;i++) {
 			var b = btn(buttons[i].label);
 			b.click(buttons[i].click);

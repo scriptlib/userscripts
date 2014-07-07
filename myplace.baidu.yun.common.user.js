@@ -10,7 +10,7 @@
 // @include     http://yun.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.013
+// @version     1.014
 // @grant none
 // Changelog
 //	2013-09-28
@@ -132,7 +132,59 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 				idx++;
 				setTimeout(function(){d.yun.Utils.doTasks(doer,tasks,idx,delay,callback)},delay);
-			}
+			},
+			pickFiles : function(all,source,callback_getprop,callback_ignore) {
+				if(!source) {
+						return all;
+				}
+				var files = [];
+				if(source.match(/^\s*Range:/)) {
+					var rangeexp = source.match(/^\s*Range:(.+?)\s*$/);
+					rangeexp = rangeexp[1];
+					var exps = rangeexp.split(/\s+/);
+					for(var i=0;i<exps.length;i++) {
+						var exp = exps[i];
+						if(exp.match(/^\s*\d+\s*$/)) {
+							var n = exp.match(/^\s*(\d+)\s*$/);
+							if(n && n[1] && n[1]>0 && n[1]<=all.length){
+								if(callback_ignore && callback_ignore(all[n[1]-1],n[1]-1)) {
+									console.log("Ignore item NO." + n[1]);
+								}
+								else {
+									files.push(all[n[1]-1]);
+								}
+							}
+						}
+						else if(exp.match(/^\s*\d+-\d+\s*$/)) {
+							var n = exp.match(/^\s*(\d+)-(\d+)\s*$/);
+							if(n && n[1] && n[2]) {
+								for(var i=n[1];i<=n[2] && i<=all.length;i++) {
+									if(callback_ignore && callback_ignore(all[i-1],i-1)) {
+									console.log("Ignore item NO." + i);
+									}
+									else {
+										files.push(all[i-1]);
+									}
+								}
+							}
+						}
+					}
+				}
+				else {
+					source = source.replace(/\^\^/g,'[\\s\\._\\-\\+]*'); //分隔符快捷方式
+					//alert(source);
+					var r = new RegExp(source,'i');
+					for(var i=0;i<all.length;i++) {
+						if(callback_ignore && callback_ignore(all[i],i)) {
+							continue;
+						}
+						else if(r.test(callback_getprop(all[i],i))) {
+							files.push(all[i]);
+						}
+					}
+				}
+				return files;
+			},
 		},
 		Messager : function(tag) {		
 			var r;

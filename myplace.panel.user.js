@@ -38,6 +38,19 @@ unsafeWindow.$myPlace = $myPlace;
 		DOMBox : null,
 		DOMHolder : null,
 		DOMControl : null,
+		PANEL_STYLE	:	
+				'padding: 4px;margin: 0px;z-index: 32768;top: 30px;'
+				+'right: 0px;width: auto;position: absolute;text-align: right;'
+				+'font: 13px helvetica,arial,clean,sans-serif;display: block;'
+				+'border: 1px solid #000;background-color: #FEFEFE;color: #010101;'
+				+'opacity: 0.6;'
+				+'',
+		LINKBOX_STYLE:
+				'margin: 0px;padding: 2px;text-align: center; '
+				+'font: 13px helvetica,arial,clean,sans-serif;display: block;color: #030303;'
+				+'',
+		CLICKABLE_STYLE:
+				'cursor:pointer;text-decoration:underline;',
 		init : function() {
 			debugPrint("Start on " + document.location);
 			if(parent != window) {
@@ -56,27 +69,11 @@ unsafeWindow.$myPlace = $myPlace;
 			panelwidth="100%";
 			panelheight="40px";
 			var panel=document.createElement("table");
+			
 			panel.id=PANEL_ID;
-			//panel.style.margin="20px";
-			panel.style.padding="2px";
-			panel.style.margin="0px";
-			panel.style.zIndex='32768';
-			panel.style.top="30px";
-			panel.style.right="0px";
-			panel.style.width='auto';
-	//        panel.style.position="fixed"; 
-			panel.style.position="absolute";        
-	//        panel.style.position='relative';
-			panel.style.textAlign='right';
-			panel.style.align='right';
-			
-			panel.style.font = '13px helvetica, arial, clean, sans-serif';
-			//panel.style.width=panelwidth;
-			//panel.style.height=panelheight;
-			panel.style.display = "block";
-			
+			panel.setAttribute('style',this.PANEL_STYLE);
 			var tr = document.createElement('tr');
-			tr.style.border="1px solid black";
+			//tr.style.border="1px solid black";
 
 			/*
 			var td = document.createElement('td');
@@ -109,35 +106,13 @@ unsafeWindow.$myPlace = $myPlace;
 			
 			var linkbox=document.createElement("td");
 			linkbox.id= PANEL_BOX_ID;
-			linkbox.style.margin="0px";
-			linkbox.style.padding="0px";
-			//linkbox.style.top="5px";
-			//linkbox.style.right="20px";
-			linkbox.style.textAlign="center";
-			//linkbox.style.position="fixed";
-			//linkbox.style.backgroudColor='darkblue';
-			
-			//linkbox.style.font = '13px/27px Arial,sans-serif';
-			linkbox.style.font = '13px helvetica, arial, clean, sans-serif';
-	//        linkbox.style.fontSize="12px";
-			linkbox.style.display = 'none';
-			// var holder = document.createElement("div");
-			// holder.id = PANEL_HOLDER_ID;
-			// holder.style.height=panelheight;
-			// holder.style.display = "none";
+			linkbox.setAttribute('style',this.LINKBOX_STYLE);
 			tr.appendChild(linkbox);
 			
 			
 			
 			panel.appendChild(tr);
-			
-			panel.style.border="1px solid black";
-			panel.style.backgroundColor="#FEFEFE";
-			panel.style.color='#010101';
-			linkbox.style.color='#030303';
-			//panel.style.backgroundColor="white";
-			//panel.style.color='#111111';
-			
+					
 			// var ss = document.createElement('style');
 			// ss.innerText = '.a {color:black;cursor:bean;    }';
 			// panel.appendChild(ss);
@@ -157,7 +132,7 @@ unsafeWindow.$myPlace = $myPlace;
 		add : function(elm,space) {
 			if(this.DOMBox) {
 				this.DOMBox.appendChild(elm);
-				if(space) {this.addSpace()};
+				if(space) {this.addSpace(space)};
 				return 1;
 			}
 			return null;
@@ -168,7 +143,7 @@ unsafeWindow.$myPlace = $myPlace;
 				if(count) {
 					var space = '';
 					for(var i=0;i<count;i++) {
-						space = space + '&nbsp;';
+						space = space + SEPARATOR_TEXT;
 					}
 					separator.innerHTML = space;				
 				}
@@ -179,18 +154,38 @@ unsafeWindow.$myPlace = $myPlace;
 			}
 			return null;
 		},
+		addLink	: function(url,text,space) {
+			var a = document.createElement('a');
+			a.href = url;
+			a.innerHTML = text;
+			a.setAttribute('style',this.CLICKABLE_STYLE);
+			this.add(a,space);
+		},
+		addText	:	function(text,space) {
+			return this.addAction(text,null,space);
+		},
+		addAction : function(text,func,space) {
+			var a = document.createElement('span');
+			if(func) {
+				a.addEventListener('click',func);
+				a.setAttribute('style',this.CLICKABLE_STYLE);
+			}		
+			a.innerHTML = text;
+			this.add(a,space);
+		},
 		addButton	: function (state1,cond,state2) {
 			var element = document.createElement('span');
 			element.innerHTML = state1.html;
-			element.style.cursor = 'pointer';
+			element.setAttribute('style',this.CLICKABLE_STYLE);
+			
 			element.addEventListener('click',function(){
 				var test = cond();
 				if(test) {
-					element.innerHTML = state2.html;
+					this.innerHTML = state2.html;
 					state2.set(element,test);
 				}
 				else {
-					element.innerHTML = state1.html;
+					this.innerHTML = state1.html;
 					state1.set(element,test);
 				}
 			});

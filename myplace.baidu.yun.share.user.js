@@ -6,7 +6,7 @@
 // @include     http://pan.baidu.com/share/*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.03
+// @version     1.014
 // @grant none
 // Change Log
 //	2013-10-09
@@ -122,47 +122,19 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				yun.Config.write(idExp,source);
 				handler.getFiles(what,function(all) {
 					var albumCount = 0;
-					var files = [];
-					if(!source) {
-						files = all;
-					}
-                    else if(source.match(/^\s*Range:/)) {
-                        var rangeexp = source.match(/^\s*Range:(.+?)\s*$/);
-                        rangeexp = rangeexp[1];
-                    	var exps = rangeexp.split(/\s+/);
-                        for(var i=0;i<exps.length;i++) {
-                            var exp = exps[i];
-                            if(exp.match(/^\s*\d+\s*$/)) {
-                                var n = exp.match(/^\s*(\d+)\s*$/);
-                                if(n && n[1] && n[1]>0 && n[1]<=all.length){
-                                    files.push(all[n[1]-1]);
-                                    console.log('Range match ' + all[n[1]-1].title);
-                                }
-                            }
-                            else if(exp.match(/^\s*\d+-\d+\s*$/)) {
-                                var n = exp.match(/^\s*(\d+)-(\d+)\s*$/);
-                                if(n && n[1] && n[2]) {
-                                    for(var i=n[1];i<=n[2] && i<=all.length;i++) {
-                                        files.push(all[i-1]);
-                                        console.log('Range match ' + all[i-1].title);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else {
-						var r = new RegExp(source,'i');
-						for(var i=0;i<all.length;i++) {
-							if(all[i].feed_type == 'album') {
+					var files = yun.Utils.pickFiles(
+						all,source,
+						function(item,idx) {
+							return "" + (idx+1) + "#" + item.title;
+						},
+						function(item,idx) {
+							if(item.feed_type && item.feed_type == 'album') {
 								albumCount++;
-								continue;
+								return true;
 							}
-							var s = "" + (i+1) + "#" + all[i].title;							
-							if(r.test(s)) {
-								files.push(all[i]);
-							}
+							return false;
 						}
-					}
+					);
 					if(albumCount>0) {
 						message(_L("Ignore $1 albums",albumCount) + ", " + _L("Get $1 tasks",files.length) + '.');
 					}

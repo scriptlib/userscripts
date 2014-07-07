@@ -2,7 +2,7 @@
 // @name           myplace.lib.datashower
 // @namespace      eotect@myplace
 // @description    myplace data shower library
-// @version 1.001
+// @version		   1.1
 //Changelog
 //	2014-05-03
 //		Copy codes from the old myplace.imagealbum
@@ -145,7 +145,7 @@ if(!$myPlace.lib) {
 				target.setAttribute('href',href);
 				target.setAttribute('src',src);
 			}
-			else if(tagname1 == 'img' && !image.no_button) {
+			else if(tagname1 == 'img' && image.zoom_button) {
 				var btn = document.createElement('button');
 				btn.innerHTML = '+';
 				btn.setAttribute('style','position:absolute;margin:10px;display:none');
@@ -286,12 +286,35 @@ if(!$myPlace.lib) {
 		idxPanel.appendChild(idxPage);
 		idxPanel.appendChild(sep);
 	}
+	
+	
+	function clickOnItem(e){
+			var idx = this.getAttribute('imgIndex');
+			var delm = document.getElementById('xz_imagesminer_images_' + idx);
+			if(delm) {
+				var se = delm.getAttribute('selected') || '0';
+				var tp = document.getElementById('datashower_item_' + idx);
+				if(se == '1') {
+					tp.style.border = '1px dashed grey';
+					tp.style.backgroundColor = null;
+					delm.setAttribute('selected',0);
+				}
+				else {
+					tp.style.border = '1px solid red';
+					tp.style.backgroudColor = '#000000';
+					delm.setAttribute('selected',1);
+				}
+			}
+	}
+	
 	function appendItem(item,idx,contPanel) {
+	
+
 		
 		var ITEMSTYLE,ITEMTITLESTYLE,ITEMINDEXSTYLE,ITEMLINKSTYLE,ITEMDESCSTYLE,ITEMIMAGESTYLE;
 		
-		ITEMSTYLE = 'text-align:left;padding-bottom:40px;';
-		ITEMTITLESTYLE = 'text-align:left;color:darkblue;padding-left:20px;font-weight:bold';
+		ITEMSTYLE = 'text-align:left;padding-bottom:40px;border:dashed 1px grey;display:block;';
+		ITEMTITLESTYLE = 'text-align:left;color:darkblue;padding-left:20px;font-weight:bold;';
 		ITEMINDEXSTYLE = 'font-size:30pt;';
 		ITEMDESCSTYLE = '';
 		ITEMIMAGESTYLE = '';
@@ -299,6 +322,9 @@ if(!$myPlace.lib) {
 		var itemElm = document.createElement('div');
 		itemElm.setAttribute('class','datashower_item');
 		itemElm.setAttribute('style',ITEMSTYLE);
+		itemElm.setAttribute('imgIndex',idx-1);
+		itemElm.id = 'datashower_item_' + (idx-1);
+		itemElm.addEventListener('click',clickOnItem);
 		
 		var itemTitle = document.createElement('div');
 		itemTitle.setAttribute('class','datashower_itemtitle');
@@ -306,25 +332,11 @@ if(!$myPlace.lib) {
 		var title1 = document.createElement('span');
 		title1.innerHTML = '#' + idx;
 		title1.setAttribute('style',ITEMINDEXSTYLE);
+		
+
+			
 		title1.setAttribute('imgIndex',idx-1);
-			title1.addEventListener('click',function(e){
-				var idx = this.getAttribute('imgIndex');
-				var delm = document.getElementById('xz_imagesminer_images_' + idx);
-				if(delm) {
-					var se = delm.getAttribute('selected') || '0';
-					var tp = this.parentNode;
-					if(se == '1') {
-						tp.style.border = null;
-						tp.style.backgroundColor = null;
-						delm.setAttribute('selected',0);
-					}
-					else {
-						tp.style.border = '1px solid red';
-						tp.style.backgroudColor = '#000000';
-						delm.setAttribute('selected',1);
-					}
-				}
-			});
+		title1.addEventListener('click',clickOnItem);
 		itemTitle.appendChild(title1);
 		
 		var title2 = document.createElement('span');

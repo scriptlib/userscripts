@@ -3,6 +3,7 @@
 // @namespace      xiaoranzzz
 // @description    Data Miner
 // @include        *
+// @version		   1.1
 // ==/UserScript==
 
 
@@ -55,10 +56,28 @@ if(!$myPlace.lib) {
 					return args[1](q,element,attr,args);
 				}
 				else {
+					var href;
+					var text;
+					if(args[2]) {
+						if(args[2].match(/^\d+$/)) {
+							href = q[args[2]];
+						}
+						else {
+							href = args[2];
+						}
+					}
+					if(args[3]) {
+						if(args[3].match(/^\d+$/)) {
+							text = q[args[3]];
+						}
+						else {
+							text = args[3];
+						}
+					}
 					return {
 						src:	(q[args[1]] ? unescape(q[args[1]]) : null),
-						href:	(q[args[2]] ? unescape(q[args[2]]) : null),
-						text:	(q[args[3]] ? unescape(q[args[3]]) : null),
+						href:	href,
+						text:	text,
 					};
 				}
 			}

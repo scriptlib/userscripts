@@ -6,7 +6,7 @@
 // @include     http://pan.baidu.com/share/link?*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     0.3
+// @version     1.014
 // @grant none
 // ==/UserScript==
 

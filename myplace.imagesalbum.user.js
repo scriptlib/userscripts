@@ -81,8 +81,18 @@
 // @include https://www.flickr.com/*
 // @include http://tieba.baidu.com/*
 // @include http://pp.163.com/*
-// @version 1.003
+// @include http://www.fengniao.com/active/*
+// @include http://instagram.com
+// @include http://www.tuigirl8.com/forum/view/*
+// @include http://item.jd.com/*
+// @include http://detail.tmall.com/item*
+// @include http://item.taobao.com/*
+// @version 1.10
 //Changelog
+//	2014-05-28
+//		Fix support for weibo.com, flickr.com
+//		Fix support for google.com
+//		Add support for instagram.com
 //	2013-09-27
 //		Add support for oisinbosoft.com
 //		Add support for arzon.jp
@@ -935,16 +945,46 @@
 		null,
 		{dialog:true}
 	);
+	$R('arzon\\.jp\/itemlist',
+		['img','src'],
+		'attr_replace',
+		[/S\.jpg$/,"L.jpg"]
+	);
 	$R('sungirlbaby\\.com',
 		['a','href'],
 		'attr_match',
 		['\.[Jj][Pp][Gg]$'],
 		{dialog:true}
 	);
-	$R('amazon\\.co\\.jp',
-		['img','src'],
+	$R('amazon\\.co\\.jp\/s\/',
+		['div.celwidget','id'],
+		function(elm,id) {
+			if(!id) return;
+			var j = $myPlace.jQuery(elm);
+			var cover = j.find('img.productImage')[0];
+			if(cover) {
+			return {
+				src: cover.src.replace(/\.(?:_SL\d+_|_)AA\d+_\.jpg$/,'.jpg'),
+				href: cover.parentNode.parentNode.href,
+				text: j.find('.newaps a').text(),
+			};
+			}
+		}
+	);
+	/*
+		['img.productImage','src'],
+		function(elm,src) {
+			if(!src) return;
+			src = src.replace(/\._SL\d+_|_AA\d+_\.jpg/,'.jpg');
+			return {src:src,href:elm.parentNode.parentNode.href,
+		}
+
+	);
+*/
+	$R('amazon\\.co\\.jp\/[^\/]+\/dp\/',
+		['.tiny img','src'],
 		'attr_replace',
-		[/\._SL\d+_\.jpg/,'.jpg'],
+		[/\._SL\d+_AA\d+_\.jpg$/,'.jpg'],
 		{dialog:true}
 	);
 	$R('weipai\.cn',
@@ -1099,6 +1139,65 @@
 			return {text:document.title,src:src};
 		}
 	);
+	
+	$R('fengniao\.com\/active\/',
+		['.img5 img,dt img','src'],
+		'attr_replace',
+		[/_\d+\.jpg$/,'_600.jpg'],
+		{no_cache_selector:true,dialog:true,click:true}
+	);
+	
+	
+	$R('instagram\.com\/[^\/]+$',
+		['div.photo-wrapper div.Image','src'],
+		function(div,src){
+			var thumb;
+			if(!src) {
+				src = div.getAttribute('style');
+				var m = src.match(/background-image:\s*url\s*\("([^"]+)/);
+				if(m) {
+					src = m[1];
+				}
+				else {
+					return false;
+				}
+			}
+			if(src.match(/\/hphotos-/)) {
+				thumb = src;
+				src = src.replace(/_\w\.jpg$/,'_o.jpg');
+			}
+			else {
+				return false;
+			}
+			var href = div.parentNode.getAttribute('href');
+			return {src:src,href:href,thumb:thumb};
+		},
+		null,
+		{no_cache_selector:true}
+	);
+	
+	$R('item\.jd\.com',
+		['.detail-content img','data-lazyload'],
+		function(elm,src) {
+			if(!src) {
+				src = elm.getAttribute('src');
+			}
+			return {src:src,text:$('h1').text()};
+		}
+	);
+		
+	
+	
+	
+	
+	//Select all jpg
+	$R(	
+		'tuigirl8\.com\/forum\/view\/',
+		['img','src'],
+		'attr_match',
+		[/^(.+\.jpg$)/,1,null,document.title]
+	);
+	
 	//****************************************************
 	//Weak Rules
 	//****************************************************

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       myplace.baidu.yun.panel
 // @namespace  eotect@myplace
-// @version    0.1
+// @version    0.2
 // @description  enter something useful
 // @include     http://pan.baidu.com/pcloud/friendpage*
 // @include     http://pan.baidu.com/share/*
@@ -40,13 +40,13 @@
 	if(unsafeWindow.FileUtils) {
 		var f = unsafeWindow.FileUtils;
 		if(f.linkUserName) {
-				$myPlace.panel.add($('<span>' + pageUK + '_' + f.linkUserName + '</span>')[0],1);
+				$myPlace.panel.addText(pageUK + '_' + f.linkUserName,1);
 		}
 	}
 
-	$myPlace.panel.add($('<a href="' + homePage + '">Home</a>')[0],1);
-    $myPlace.panel.add($('<a href="' + followsPage + '">Follows</a>')[0],1);
-    $myPlace.panel.add($('<a href="' + fansPage + '">Fans</a>')[0]);
+	$myPlace.panel.addLink(homePage,"Home",1);
+    $myPlace.panel.addLink(followsPage,"Follows",1);
+    $myPlace.panel.addLink(fansPage,"Fans");
     $myPlace.panel.show();
     
 })();
