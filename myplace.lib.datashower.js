@@ -2,7 +2,7 @@
 // @name           myplace.lib.datashower
 // @namespace      eotect@myplace
 // @description    myplace data shower library
-// @version		   1.1
+// @version		   1.2
 //Changelog
 //	2014-05-03
 //		Copy codes from the old myplace.imagealbum

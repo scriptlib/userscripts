@@ -3,7 +3,7 @@
 // @namespace      xiaoranzzz
 // @description    Data Miner
 // @include        *
-// @version		   1.1
+// @version		   1.2
 // ==/UserScript==
 
 

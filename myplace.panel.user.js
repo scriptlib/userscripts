@@ -3,7 +3,7 @@
 // @namespace      eotect@myplace
 // @description    $myPlace.panel
 // @include        http*
-// @version        1.01
+// @version        1.02
 // @grant	none
 // ==/UserScript==
 
