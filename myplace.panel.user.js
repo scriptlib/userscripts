@@ -39,7 +39,7 @@ unsafeWindow.$myPlace = $myPlace;
 		DOMHolder : null,
 		DOMControl : null,
 		PANEL_STYLE	:	
-				'padding: 4px;margin: 0px;z-index: 32768;top: 30px;'
+				'padding: 4px;margin: 0px;z-index: 100000027;top: 30px;'
 				+'right: 0px;width: auto;position: absolute;text-align: right;'
 				+'font: 13px helvetica,arial,clean,sans-serif;display: block;'
 				+'border: 1px solid #000;background-color: #FEFEFE;color: #010101;'

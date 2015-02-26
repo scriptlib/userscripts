@@ -5,6 +5,7 @@
 // @include        *
 // @version		 	1.1
 // @grant none
+// @author			eotect@myplace
 // ==/UserScript==
 
 
@@ -20,21 +21,26 @@ unsafeWindow.$myPlace = $myPlace;
 
 
 (function(_){
-	_._models = {};
-	_.register = function(name,value){
-		if(typeof _[name] == undefined) {
-			_._models[name] = value;
+	_.register = function(name,obj){
+		if(_[name] === undefined) {
+            _[name] = {};
 		}
-		else {
-			throw new Error(name + " already defined.");
+		if(obj) {
+			for(var p in obj ){
+				_[name][p] = obj[p];
+			}
 		}
+        return _[name];
 	};
-	_.service = function(name) {
-		return _._models[name];
+	_.unregister = function(name) {
+		delete _[name];
+	};
+	_.replace = function(name,obj) {
+		_[name] = obj;
 	};
 	_.log = function(txt,mode) {
 		if(console) {
-			return console.log(txt);
+			console.log(txt);
 		}
 		else {
 			alert(txt);

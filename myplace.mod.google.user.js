@@ -23,7 +23,7 @@ var panel=$myPlace.panel;
 			var hrefexp = new RegExp(/&q=(http:\/\/[^&]*)&ei/i);
 			var sites = new Array(
 				['fotop\\.net','snaapa.com'],
-				['(sis001\\.com|67.220.92.23)','67.220.91.30'],
+				['(sis001\\.com|67.220.92.23|67.220.91.20)','38.103.161.186'],
 				['(sexinsex\\.net|64.120.179.165)','67.220.90.30'],
 				['sejie\\.com','174.37.129.201']
 			);

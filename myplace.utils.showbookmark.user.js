@@ -2,29 +2,37 @@
 // @name        myplace.utils.showbookmark
 // @namespace   eotect@myplace
 // @description Bookmarks shower
-// @include     http*#photo-url:http*
-// @version     1.02
-// @grant 		none
+// @include		*
+// @version     1.04
+// @grant	none
 // ==/UserScript==
 
-if(!unsafeWindow) {
-	unsafeWindow = window;
+if(typeof unsafeWindow == 'undefined') {
+    var unsafewindow  = window;
+    window.unsafeWindow = window;
 }
-var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+if(typeof $myPlace == 'undefined') {
+	var $myPlace = unsafeWindow.$myPlace || {};
+}
 unsafeWindow.$myPlace = $myPlace;
-if(!$myPlace.utils) $myPlace.utils = {};
 
-$myPlace.utils.showbookmark = function(){
-	var href = document.location.href;
-	if(!href) return;
-	var m = href.match(/^(http[s:].+)#photo-url:(http[s:].+)$/);
-	if(!m) return;
-	var div;// = document.createElement('div');
-	div = '<div style="padding:20px;text-align="left">';
-	div += '<h3><a href="' + m[1] + '">' + document.title + '</a></h3>';
-	div += '<p><img src="' + m[2] + '"><br/></p>';
-	div += 'source: <a href="' + m[1] + '">'
-	div += m[1] + '</a>';
-	document.body.innerHTML = div;
-}
-$myPlace.utils.showbookmark();
+$myPlace.register('utils',{
+	showbookmark:	function(){
+		var div,m,href = document.location.href;
+		if(!href) {
+			return;
+		}
+		m = href.match(/^(http[s:].+)#photo-url:(http[s:].+)$/);
+		if(!m) {
+			return;
+		}
+		div = '<div style="padding:20px;text-align="left">';
+		div += '<h3><a href="' + m[1] + '">' + document.title + '</a></h3>';
+		div += '<p><img src="' + m[2] + '"><br/></p>';
+		div += 'source: <a href="' + m[1] + '">';
+		div += m[1] + '</a>';
+		document.body.innerHTML = div;
+	},
+}).showbookmark();
+
+

@@ -21,6 +21,9 @@ if(!$myPlace.lib) {
 
 
 (function(_){
+        if(parent != window) {
+			return;
+		}
 
 	debugPrint("[Start]" + Date());
 	var XRZPanel = $myPlace.panel;
@@ -32,7 +35,7 @@ if(!$myPlace.lib) {
 	var PAGECOUNT;
 	var LEFTCOUNT;
 
-	const PAGESIZE = 25;
+	const PAGESIZE = 30;
 	const PAGESIZEMIN = 5;
 	const INDEXSTYLE=' style="text-decoration:underline;cursor:pointer;color:darkblue;" ';
 	
@@ -330,7 +333,12 @@ if(!$myPlace.lib) {
 		itemTitle.setAttribute('class','datashower_itemtitle');
 		itemTitle.setAttribute('style',ITEMTITLESTYLE);
 		var title1 = document.createElement('span');
-		title1.innerHTML = '#' + idx;
+		if(item.no_index) {
+			title1.innerHTML = "";
+		}
+		else {
+			title1.innerHTML = '#' + idx;
+		}
 		title1.setAttribute('style',ITEMINDEXSTYLE);
 		
 
@@ -450,14 +458,14 @@ if(!$myPlace.lib) {
 				+ 'background-color:#F9FFE5;overflow:scroll;'
 				+ 'position:fixed;top:88px;left:2%;'
 				+ 'width:95%;height:600px;'
-				+ 'z-index:32767;border:solid black 1px'
+				+ 'z-index:100000027;border:solid black 1px'
 			);			
 			ctrlBar.setAttribute('style',
 				  'text-color:block;background-color:grey;'
 				+ 'margin:0px;padding:4px;'
 				+ 'position:fixed;top:60px;left:2%;'
 				+ 'width:95%;height:20px;'
-				+ 'z-index:32767;border:solid black 1px'
+				+ 'z-index:100000027;border:solid black 1px'
 			);			
 			nvHolder.appendChild(content);
 			nvPanel.appendChild(nvHolder);
@@ -513,7 +521,7 @@ if(!$myPlace.lib) {
 				+ 'background-color:#F9FFE5;overflow:scroll;'
 				+ 'position:fixed;top:80px;left:2%;'
 				+ 'width:95%;height:600px;'
-				+ 'z-index:32767;border:solid black 1px'
+				+ 'z-index:100000027;border:solid black 1px'
 			);
 			
 			ctrlBar.setAttribute('style',
@@ -521,7 +529,7 @@ if(!$myPlace.lib) {
 				+ 'margin:0px;padding:4px;'
 				+ 'position:fixed;top:60px;left:2%;'
 				+ 'width:95%;height:20px;'
-				+ 'z-index:32767;border:solid black 1px'
+				+ 'z-index:100000027;border:solid black 1px'
 			);
 			
 			//ctrlBar.setAttribute('style','width:100%;position:fixed;');

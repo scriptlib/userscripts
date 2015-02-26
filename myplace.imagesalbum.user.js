@@ -87,8 +87,26 @@
 // @include http://item.jd.com/*
 // @include http://detail.tmall.com/item*
 // @include http://item.taobao.com/*
-// @version 1.10
+// Qvod sites:
+// @include http://*/videos/*
+// @include http://*/movie/*
+// @include http://*/Html/P/*
+// @include http://*qvod*
+// @include http://*8816.cc/er/*
+// @include http://*\/player*
+// @include http://*/?s=vod-play-*
+// @include http://*yuyiyuyi.com/gs/*
+// @include http://wd.koudai.com/*
+// @include http://ffffound.com/image/*
+// @include http://ffffound.com/home/*
+// @include http://*.tumblr.com/*
+// @include http://*.xingyun.cn/*
+// @version 1.12
 //Changelog
+//	2015-01-18
+//		Add support for wd.koudai.com
+//  2014-08-04
+//		Add support for item.jd.com, item.taobao.com
 //	2014-05-28
 //		Fix support for weibo.com, flickr.com
 //		Fix support for google.com
@@ -99,6 +117,9 @@
 // ==/UserScript==
 
 (function(){
+        if(parent != window) {
+			return;
+		}
 	
 	if(!unsafeWindow) {
 		unsafeWindow = window;
@@ -108,6 +129,7 @@
 	var $ = $myPlace.jQuery || unsafeWindow.$;
 	
 	var DOCHREF = document.location.href;
+	var DOCTITLE = document.title;
 	var ELMLINKS = document.getElementsByTagName('a');
 	var ELMIMGS = document.getElementsByTagName('img');
 	
@@ -615,8 +637,8 @@
 	M.register(/boards\.4chan\.org/,
 		['a:has(img)','href'],
 		'attr_match',
-		[/^(.+\/src\/([^\.\/]+\.(jpg|png|jpeg|gif)))$/,1],
-		{inline:true,no_wrap:true}
+		[/^(.+\/([^\.\/]+\.(?:jpg|png|jpeg|gif)))$/,1,DOCHREF,document.title],
+		{inline:false,dialog:true}
 	);
 		
 	M.register(
@@ -709,7 +731,13 @@
 		['img','src'],
 		'attr_replace',
 		[/_\d+x\d+\.[^\.]+$/,''],
-		{}
+		{linkpage:true,loadmode:'Interative'}
+	);
+	M.register(/http:\/\/mm\.taobao\.com/,
+		['img.mm-template-src','src'],
+		'attr_replace',
+		[/_\d+x\d+\.[^\.]+$/,''],
+		{linkpage:true,no_cache_selector:true,loadmode:'Interative'}
 	);
 	M.reg(/http:\/\/blog\.cntv\.cn/,
 		['a img', 'src'],
@@ -812,6 +840,14 @@
 		'attr_replace',
 		[/\/mblogpic\/([^\/]+)\/160/,'/mblogpic/$1/2000'],
 		{dialog:true, no_cache_selector:true}
+	);
+		$M(/t\.qq\.com/,
+		['.url','href'],
+		function(elm,href) {
+			return {href:href};
+		},
+		null,
+		{dialog:true, no_cache_selector:true, no_index:true}
 	);
 	$R('moko\.cc\/[^\/]+\.html$',
 		['img','src'],
@@ -1104,14 +1140,14 @@
 			text = text.replace(/[　\s\n\r]+$/,'').replace(/[　\s\n\r]+/,' ','mg')
 			
 			
-			var jlink = detail.find('.WB_from .S_link2');;
+			var jlink = detail.find('.WB_from .S_txt2');;
 			if(!jlink) return;			
 			var href = jlink[0].href;
 					
 			var title = document.title;
 			title = title.replace(/\|[^\|]+$/,'');
 			
-			var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/;
+			var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(?:gif|jpg)$/;
 			var images = new Array();
 			for(var i=0;i<imgelms.length;i++) {
 				var src = imgelms[i].src;
@@ -1176,17 +1212,110 @@
 		{no_cache_selector:true}
 	);
 	
+
+	
 	$R('item\.jd\.com',
 		['.detail-content img','data-lazyload'],
 		function(elm,src) {
 			if(!src) {
 				src = elm.getAttribute('src');
 			}
-			return {src:src,text:$('h1').text()};
+			//src = src.replace(/\/(?:n\d+|popWaterMark)\//,'/n0/');
+			if(src) {
+				return {src:src,text:$('h1').text()};
+			}
 		}
 	);
-		
 	
+	$R('item\.jd\.com',
+		['.spec-items img','src'],
+		function(elm,src) {
+			if(src) {
+				src = src.replace(/\/(?:n\d+)\//,'/n0/');
+				return {src:src,text:$('h1').text()};
+			}
+		}
+	);
+	
+	$R('item\.taobao\.com',
+		['ul img','data-src'],
+		function(elm,src) {
+			if(src) {
+				src = src.replace(/_\d+x\d+\.jpg$/,'');
+				return {src:src,text:document.title};
+			}
+		}
+	);
+	
+	$R('item\.taobao\.com',
+		['#description img','src'],
+		function(elm,src) {
+			if(src && src.match(/\/imgextra\//)) {
+				return {src:src,text:document.title};
+			}
+		},
+		null,
+		{no_cache_selector:true}
+	);
+	
+	function extract_qvod(text) {
+		GM_log("Text:" + text);
+		if(!text) return [];
+		var links = [];
+		if(typeof(text) == 'string') {
+			text = decodeURIComponent(text);
+			GM_log("LINK:" + text);
+			//bdhd://591151719|764A8F073E149B2A476C404CE119CE36|一夜情深BD版.rmvb|
+			var exp =/((?:bdhd|qvod):\/\/[^\|]+\|[^\|]+\|[^\|]+\|?|jjhd:\/\/[^\|]+\|[^\|]+\|[^\+\|]+)/g; 
+			var m;
+			while((m = exp.exec(text)) != null) {
+				links.push(m[1]);
+			}
+			if(!links.length) {
+				var exp = /\$((?:jjhd|gvod|qvod|xfmedia|ftp):\/\/[^\$]+)\$/g;
+				while((m = exp.exec(text)) != null) {
+					links.push(m[1]);
+				}
+			}
+		}
+		else {
+			for(var prop in text) {
+				GM_log("Prop: " + prop);
+				var slinks = extract_qvod(text[prop]);
+				if(slinks.length) {
+					links = links.concat(slinks);
+				}
+			}
+		}
+		return links;
+	}
+	M.register(
+		/.*(?:\/player|\/videos|\/Html\/P|\/\?s=vod-play|yuyiyuyi\.com\/gs\/)/,
+		  ['body','id'],
+		  function() {
+			var results = [];		
+			for  each (var prop in [
+					'VideoListJson',
+					'VideoInfoList',
+					'VideoListplay',
+					'url_list',
+					'playdata'
+			]) {
+				GM_log(prop + " = " + unsafeWindow[prop]);
+				var links = extract_qvod(unsafeWindow[prop]);
+				for(var i=0;i<links.length;i++) {
+					results.push({href:links[i],text:links[i]});
+				}
+				if(results.length) break;
+			}
+			if(results.length) {
+				return results;
+			}
+		  },
+		  null,
+		  {no_cache_selector:true}
+	  );
+
 	
 	
 	
@@ -1197,6 +1326,77 @@
 		'attr_match',
 		[/^(.+\.jpg$)/,1,null,document.title]
 	);
+	
+	$R(
+		'wd\.koudai\.com',
+		['#detail_wrap img','src'],
+		function(elm,src) {
+			if(src && src.match(/\.jpg|\.jpeg/)) {
+				return {src:src,text:document.title};
+			}
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	);
+
+	$R('ffffound.com\/(?:image|home)',
+		['div#assets blockquote','id'],
+		function(blk,id) {
+			var header = $('div.header',blk)[0];
+			var link = $('div.title a',header)[0];
+			var ref = document.location.href;
+			var imgtb = header.nextElementSibling;
+			var images = $('table a img',imgtb);
+			var r = new Array();
+			for(var i=0;i<images.length;i++) {
+				if(!images[i].src.match(/_m\.(?:jpg|gif|png|jpeg)$/)) {
+					continue;
+				}
+				r.push({src:images[i].src, href:ref, desc:'Source: ' + link.href, text:link.textContent});
+				r.push({src:images[i].src,href:link.href, desc:'Via: ' + ref, text:link.textContent});
+				r.push({src:images[i].parentNode.href,href:ref, desc:'Source: ' + link.href, text:link.textContent});
+				r.push({src:images[i].parentNode.href,href:link.href, desc:'Via: ' + ref, text:link.textContent});
+			}
+			return r;
+		}
+	);
+	
+	M.addSite('tumblr\.com',
+		function() {
+			var docs = new Array();
+			docs.push(document);
+			var ifrs = document.getElementsByTagName('iframe');;
+			for(var i=0;i<ifrs.length;i++) {
+				if(ifrs[i].contentDocument) {
+					docs.push(ifrs[i].contentDocument);
+				}
+			}
+
+			var r = new Array();
+			for(var j=0;j<docs.length;j++) {
+				var imgs = docs[j].getElementsByTagName('img');
+				for(var i=0;i<imgs.length;i++) {
+					var src = imgs[i].src;
+					if(src && src.match(/_\d+\.(?:jpg|gif)$/)) {
+						src = src.replace(/_250\.(jpg|gif)$/,'_500.$1');
+						r.push({src:src,href:document.location.href,text:document.title});
+					}
+				}
+			}
+			return r;
+
+		},
+		false,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	);
+	
+	$R('xingyun\.cn',
+		['figure>a:has("img")','href'],
+		function(a,href) {
+			return {src:href,href:DOCHREF,text:DOCTITLE};
+		}
+	);
+	
 	
 	//****************************************************
 	//Weak Rules
@@ -1234,8 +1434,8 @@
 		{inline:true}
 	);
 	
-	$myPlace.lib.datashower.init(M);
-	$myPlace.lib.datashower.start();
+		$myPlace.lib.datashower.init(M);
+		$myPlace.lib.datashower.start();
 		
 })();
 		

@@ -26,7 +26,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 	var Utilities = unsafeWindow.Utilities;
 	var Messager = new yun.Messager('li');
 	function message(t,m) {
-		return Messager.say.apply(t,m);
+		return Messager.say(t,m);
 	}
 	var _L = yun._L;
 	

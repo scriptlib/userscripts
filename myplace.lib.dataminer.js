@@ -15,6 +15,9 @@ if(!$myPlace.lib) {
 }
 
 (function(_){
+        if(parent != window) {
+			return;
+		}
 	//DATA MINER
 	var SIMPLE_EXPS = [
 		[/thumbs\//,''],
@@ -104,7 +107,25 @@ if(!$myPlace.lib) {
 			return {src:attr};
 		},
 	}
-		
+	
+	function get_attribute(elm,attr) {
+		if(!attr) {
+			return null;
+		}
+		if(attr[0] == ':') {			
+			return $(elm).prop(attr.substr(1));
+		}
+		return $(elm).attr(attr);
+	}
+	function get_first_attribute(elm,attrs) {
+		for(var i=0;i<attrs.length;i++) {
+			var r = get_attribute(elm,attrs[i]);
+			if(r) {
+				return r;
+			}
+		}
+	}
+	
 	function dataMiner(DOC_HREF) {
 		this.DOC_HREF = DOC_HREF || null;
 		this.MINER = new Array();
@@ -156,15 +177,11 @@ if(!$myPlace.lib) {
 					attr = jquery_selector[1];
 					jquery_selector = jquery_selector[0];
 				}
-				if(attr && attr[0] == ':') {
-					get_attr = function(elm,attr) {
-						return $(elm).prop(attr.substr(1));
-					}
+				if(typeof(attr) == 'object' || typeof(attr) == 'array') {
+					get_attr =  get_first_attribute; 
 				}
-				else if(attr){
-					get_attr =  function(elm,attr) {
-						return $(elm).attr(attr);
-					}
+				else if(attr) {
+					get_attr = get_attribute;
 				}
 				else {
 					get_attr =  function() {};
@@ -228,6 +245,16 @@ if(!$myPlace.lib) {
 				debugPrint(this.DOC_HREF + "\n =~ " + site + ' => ' + result.length + ' images');
 				this.lastMatch = result.length;
 				if(result.length>0) {
+					if(property.linkpage) {
+						for(var i=0;i<result.length;i++) {
+								if(!result[i].text) {
+									result[i].text = document.title;
+								}
+								if(!result[i].href) {
+									result[i].href = document.location.href;
+								}
+						}
+					}
 					//if(property.showtable) SHOWTABLE=true;
 					//data = data.concat(result);
 					return result;
@@ -242,7 +269,7 @@ if(!$myPlace.lib) {
 		this.addSite = function(exp,funGet,show) {
 			return this.register(
 				exp,
-				[document,'location'],
+				[document.documentElement.firstChild,'tagName'],
 				function(doc,DOC_HREF) {
 					return funGet(DOC_HREF,doc);
 				},

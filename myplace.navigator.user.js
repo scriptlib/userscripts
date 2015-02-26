@@ -2,10 +2,30 @@
 // @name           myplace.navigator
 // @namespace      eotect@myplace
 // @description    $myPlace.navigator
-// @include        http*
+// @include 		*/forum*
+// @include		*/bbs*
+// @include		*/threads*
+// @include		*/thread.php*
+// @include		*/thread-htm-fid*
+// @include		*/archiver/*
+// @include		*/simply/*
+// @include		*/index.php/board*
+// @include		http://club.china.com/data/threads/*
+// @include		http://tu11.com/*
+// @include		http://*hhhggg.info/*
+// @include		http://club.yule.sohu.com/*
+// @include		http://pornothon.net/*
+// @include		*/html/*/
+// @include		
 // @exclude			*google.*
-// @version			1.01
+// @version			1.02
 // @grant 		none
+//
+// @changelog
+//
+//	2015-01-20	eotect
+//	Use jQuery
+//
 // ==/UserScript==
 
 if(!unsafeWindow) {
@@ -13,7 +33,6 @@ if(!unsafeWindow) {
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ =  $myPlace.jQuery;
 var XRZPanel = $myPlace.panel;
 
 (function(_){
@@ -96,7 +115,9 @@ var XRZPanel = $myPlace.panel;
 	register_exp(null,/\/forum\.php\?mod=viewthread/);
 	register_exp(/index\.php\/board,/,/topic,\d+\.0\.html/);
 	register_exp(/pornothon\.net\/[^\/]+\//,/\/\d+-[^-]+-[^-]+-.+\.html/);
-
+	register_exp(/\/thread-htm-fid/,/\/read-htm-tid-\d+\.html/);
+	register_exp(/\/thread\.php\?fid/,/\/read-htm-tid-\d+\.html/);
+	
 	for(var i=0;i<filters.length;i++) {
 		var f = filters[i];
 		if(f && (!base.match(f.base)))
@@ -331,11 +352,9 @@ var XRZPanel = $myPlace.panel;
 	function createTitle() {
 		document.title = subLinks[curSubLink].textContent;
 		var elm = document.createElement("span");
-		$(elm).text(subLinks[curSubLink].textContent);
-		$(elm).attr({
-			title: subLinks[curSubLink].href,
-			style: 'font-weight:bold;text-align:center;paddings:0px;margins:0px;'
-		})
+		elm.innerHTML = '<b>' + subLinks[curSubLink].textContent + '</b>';
+		elm.setAttribute('title',subLinks[curSubLink].href);
+		elm.setAttribute('style','font-weight:bold;text-align:center;paddings:0px;margins:0px;');
 		return elm;
 	}
 
@@ -397,8 +416,8 @@ var XRZPanel = $myPlace.panel;
 	function loadPage(idx) {
 		var view = document.getElementById(id_view);
 		if(0 && $) {
-	//        $.get(subLinks[curSubLink].href,null,function (data) { $(view).html(data); },'html');
-			$(view).load(subLinks[curSubLink].href);
+	//        $.get(subLinks[curSubLink].href,null,function (data) { $myPlace.$(view).html(data); },'html');
+			$myPlace.$(view).load(subLinks[curSubLink].href);
 		}
 		else {
 			view.setAttribute("src",subLinks[curSubLink].href);

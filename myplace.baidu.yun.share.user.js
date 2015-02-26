@@ -22,7 +22,6 @@ if(!unsafeWindow) {
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = unsafeWindow.$ || $myPlace.jQuery;
 $myPlace.baidu = $myPlace.baidu || {};
 $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 
@@ -31,21 +30,51 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 	var FileUtils = unsafeWindow.FileUtils;
 	var Page = unsafeWindow.Page;
 	var RestApi = disk.api.RestAPI;
-	var Messager = new yun.Messager('li');
+	
 	function message(text,mode) {
-		return Messager.say(text,mode);
+		return yun.message(text);
 	}
 	var _L = yun._L;
 	yun.share = {
 		_L	:	yun._L,
 		message : message,
-		doTransferFiles: function (D, A, E, C, _) {
+		mboxSelectFiles:	function(){
+			(function( ){var a=$myPlace.$('li[node-type="sharelist-item"] a[class="global-icon global-icon-checkbox"]');window.myplace_cached_sharelist=a;var idx=new Number(prompt("Select start index:"));var len=new Number(prompt("Number of items to select:"));for(var i=idx;i<a.length && i<idx+len;i++){a[i].click()};})();
+		},
+		doTransferFilesByFSID: function (D, A, E, C, _) {
 			var self = yun.share;
+			var files = [];
+			for(var i=0;i<A.length;i++) {
+				files.push(A[i].fs_id);
+			}
             var B = {
                 path: D,
-                filelist: $.stringify(A)
+                fsidlist: "[" + files.join(",") + "]",
             };
-			//message(_L("Posting") +' '+ RestApi.TRANSFER,1);
+			console.log("[#TRANSFER] " + B.path + "  <-- " + B.fsidlist);
+            $.post(RestApi.TRANSFER  + "&from=" + encodeURIComponent(E) + "&shareid=" + C, B, function (B) {
+                var A = null;
+                try {
+                    A = $.parseJSON(B);
+                } catch (C) {
+                    A = null;
+                }
+                if (typeof _ == "function") {
+                    _(A);
+                }
+            });
+        },
+		doTransferFiles: function (D, A, E, C, _) {
+			var self = yun.share;
+			var files = [];
+			for(var i=0;i<A.length;i++) {
+				files.push(A[i].path);
+			}
+            var B = {
+                path: D,
+                filelist: $.stringify(files)
+            };
+			console.log("[#TRANSFER] " + D + "  <-- " +$.stringify(files));
             $.post(RestApi.TRANSFER  + "&from=" + encodeURIComponent(E) + "&shareid=" + C, B, function (B) {
                 var A = null;
                 try {
@@ -62,9 +91,12 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
             return _.substring(_.indexOf(":/") + 1);
         },
 		saveFile : function(t) {
-			return yun.share.doTransferFiles(t.path,t.filelist,t.uk,t.shareid,function(res){
-				//message("RESULT: " + res);
-			});
+			if(t.filelist && t.filelist[0].fs_id){
+				return yun.share.doTransferFilesByFSID(t.path,t.filelist,t.uk,t.shareid,function(res){});
+			}
+			else {
+				return yun.share.doTransferFiles(t.path,t.filelist,t.uk,t.shareid,function(res){});
+			}
 		},
 		saveFiles : function(path,f) {
 			var tasks = [];
@@ -81,7 +113,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					if(typeof $myPlace.baidu.yun.share.HACKPATH == 'function') {
 						f[i].filelist[j].path = $myPlace.baidu.yun.share.HACKPATH(f[i].filelist[j].path);
 					}
-					fl.push(f[i].filelist[j].path);
+					fl.push(f[i].filelist[j]);
 				}
 				tasks.push({
 					path: path,
@@ -110,7 +142,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			if(!self.SaveDialog) {
 				self.SaveDialog = new yun.SaveDialog(default_path,default_exp);
 			}
-            var docwraper=$('#docWraper');
+            var docwraper=$myPlace.$('#docWraper');
             docwraper.length && docwraper.hide();
 			self.SaveDialog.setVisible(true);
             self.SaveDialog.OnCancel = function() {

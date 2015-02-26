@@ -4,6 +4,214 @@
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
 // @include     http://yun.baidu.com/disk/home*
+// @version     2.02
+// @grant 		none
+// Changelog
+// 2014-10-17
+//		Baidu API Changed, This Changed
+//	2013-09-28
+//		Add support for magnet links
+// ==/UserScript==
+if(!unsafeWindow) {
+	unsafeWindow = window;
+}
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+unsafeWindow.$myPlace = $myPlace;
+
+
+(function(yun){
+
+	var _L = yun._L;
+	
+	
+	yun.API.diskHome = unsafeWindow.require("clouddisk-ui:widget/list-view/disk-home.js");
+	
+
+	
+	var DC = yun.API.dataCenter;
+	var DH = yun.API.diskHome;
+	var TST = yun.API.toast;
+	
+	
+	
+	yun.fileman = {
+		get_item_selected : function() {
+			return DC.get('selectedList');
+		},
+		get_file_selected: function() {
+			return DC.get('tmpl-selected-list')();
+		},
+		move: function(list,dest,callback) {
+			yun.API.commonService.getWidgets("common:widget/fileMoveCopyManager/fileMoveCopyManager.js", function(e) {
+				yun.fileMoveCopyManager = yun.fileMoveCopyManager || new e;			
+					yun.fileMoveCopyManager.moveTo({
+						list: list,
+						filemanager: "move",
+						succCallback: function(e, t) {
+							if(callback) {
+								callback(e, t) ;
+							}	
+						},
+						destPath: dest
+					});
+				
+			});
+		},
+		rename:	function(file,exp,rpl,func) {
+			var oldname = file.server_filename;
+			var newname = oldname.replace(exp,rpl);
+			if(newname != oldname) {
+				console.log("Rename " + oldname + " => " + newname);
+			}
+			else {
+				console.log('Rename ' + oldname + ' [Nothing to do]'); 
+			}
+			return DH.rename(file.fs_id,newname,func);
+		},
+	};
+	yun.actions = {
+		rename : function(exp,rpl) {
+			var list = yun.fileman.get_file_selected();
+			
+			for(var i=0;i<list.length-1;i++) {
+				yun.fileman.rename(list[i],exp,rpl,function(){});
+			}
+			if(list.length) {
+				return yun.fileman.rename(list[list.length-1],exp,rpl,function(){DH.render()});
+			}
+			else {
+				yun.message(_L('Error: No file selected'),yun.MessageMode.MODE_CAUTION);
+			}
+		},
+		refresh : function() {
+			DH.render();
+		},
+		moveTo: function(dest,callback) {
+			var list = yun.fileman.get_file_selected();
+			if(!list.length) {
+				return yun.message(_L('Error: No file selected'),yun.MessageMode.MODE_CAUTION);
+			}
+			yun.fileman.move(list,dest,callback);
+		},
+	};
+	
+	$myPlace.$(document).ready(function(){
+		function btn(text) {
+			return $myPlace.$(
+			'<div style="margin-left:6px;display:inline-block" class="module-list-toolbar"><a style="padding-left:10px;display:inline-block;" href="javascript:;" class="btn">' + 
+				'<span class="btn-val">' + 	text + 	 '</span>' +
+			'</a></div>'
+			);
+		}
+		function buttonClick(what,arg1,arg2,arg3) {
+			var self = yun.Fileman;
+			var idPath = "FilemanPath";
+			var idExp = "FilemanExp";
+			var default_path = yun.Config.read(idPath) || '/testing';
+			var default_exp = yun.Config.read(idExp) || '.*';
+			if(!self.SaveDialog) {
+				self.SaveDialog = new yun.SaveDialog(default_path,default_exp);
+			}
+			self.SaveDialog.setVisible(true);
+			self.SaveDialog.OnConsent = function(source,target) {
+				yun.Config.write(idPath,target);
+				yun.Config.write(idExp,source);
+				self.getList(what,function(all) {
+					var files = yun.Utils.pickFiles(
+						all,source,
+						function(item,idx) {
+							return "" + (idx+1) + "#" + item.server_filename;
+						}
+					);
+					message(_L("Get $1 tasks",files.length) + '.');
+					if(files.length > 0) {
+						yun.actions.transferFiles(what,target,files,arg1,arg2,arg3);
+					}
+					return 1;
+				});
+			};
+		}
+		var self = yun.LinkSaver;
+		var buttons = [
+			{
+				label:	_L('Refresh'),
+				click:	function() {
+					return yun.actions.refresh();
+				}
+			},
+			{
+				label:	  _L('Rename'),
+				click:	function(){
+					var exp = prompt(_L("Input regexp:"),yun.Config.read('LastRenameExp') || "");
+					if(exp) {
+						var rpl = prompt(_L("Input replacement:"),yun.Config.read("LastRenameReplacement") || "");
+						yun.Config.write('LastRenameExp',exp);
+						yun.Config.write('LastRenameReplacement',rpl);
+						return yun.actions.rename(new RegExp(exp),rpl);
+					}
+				},
+			},
+			{
+				label:	_L('Move4'),
+				click:	function() {
+					var dest = prompt(_L("Input target destination:"),yun.Config.read("LastTargetDest4"));
+					if(dest) {
+						yun.Config.write("LastTargetDest4",dest);
+						return yun.actions.moveTo(dest,function(){yun.actions.refresh()});
+					}
+				},
+			},
+			{
+				label:	_L('Move3'),
+				click:	function() {
+					var dest = prompt(_L("Input target destination:"),yun.Config.read("LastTargetDest3"));
+					if(dest) {
+						yun.Config.write("LastTargetDest3",dest);
+						return yun.actions.moveTo(dest,function(){yun.actions.refresh()});
+					}
+				},
+			},
+			{
+				label:	_L('Move2'),
+				click:	function() {
+					var dest = prompt(_L("Input target destination:"),yun.Config.read("LastTargetDest2"));
+					if(dest) {
+						yun.Config.write("LastTargetDest2",dest);
+						return yun.actions.moveTo(dest,function(){yun.actions.refresh()});
+					}
+				},
+			},
+			{
+				label:	_L('Move1'),
+				click:	function() {
+					var dest = prompt(_L("Input target destination:"),yun.Config.read("LastTargetDest1"));
+					if(dest) {
+						yun.Config.write("LastTargetDest1",dest);
+						return yun.actions.moveTo(dest,function(){yun.actions.refresh()});
+					}
+				},
+			},
+		
+		];
+		pos = $myPlace.$('.list[node-type="btn-list"]')[0];//.parentNode;
+		for(var i=0;i<buttons.length;i++) {
+			var b = btn(buttons[i].label);
+			b.click(buttons[i].click);
+			b.insertBefore(pos);
+			pos = b[0];
+		}
+	});
+	unsafeWindow.myDisk = disk;
+})($myPlace.baidu.yun);
+
+
+/*
+// ==UserScript==
+// @name        myplace.baidu.yun.fileman
+// @namespace   eotect@myplace
+// @description 百度网盘文件管理
+// @include     http://pan.baidu.com/disk/home*
+// @include     http://yun.baidu.com/disk/home*
 // @version     1.02
 // @grant 		none
 // Changelog
@@ -352,9 +560,9 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		}
     };
 		
-	$(document).ready(function(){
+	$myPlace.$(document).ready(function(){
 		function btn(text) {
-			return $('<li><button style="display:block;height:29px;margin-right:5px" ' +
+			return $myPlace.$('<li><button style="display:block;height:29px;margin-right:5px" ' +
 				'title="' + text + '" href="javascript:;" class="two-pix-btn">' + 
 				text + 	'</button></li>');
 		}
@@ -425,7 +633,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 			},
 		];
-		pos = $('.list[node-type="btn-list"]')[0];//.parentNode;
+		pos = $myPlace.$('.list[node-type="btn-list"]')[0];//.parentNode;
 		for(var i=0;i<buttons.length;i++) {
 			var b = btn(buttons[i].label);
 			b.click(buttons[i].click);
@@ -436,4 +644,4 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 	unsafeWindow.myDisk = disk;
 })($myPlace.baidu.yun);
 
-
+*/

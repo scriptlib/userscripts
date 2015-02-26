@@ -12,14 +12,11 @@
 // ==/UserScript==
 
 (function(){
-    if(typeof unsafeWindow == 'undefined') {
-    	var unsafeWindow = window;
-        window.unsafeWindow = window;
-    }
-    if(typeof $myPlace == 'undefined') {
-        var $myPlace = unsafeWindow.$myPlace;
-    }
-    var $ = $myPlace.jQuery;   
+	if(!unsafeWindow) {
+		unsafeWindow = window;
+	}
+	var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+	unsafeWindow.$myPlace = $myPlace;
     function ukFromUrl(href) {
         var r = href.match(/uk=(\d+)/);
         if(r) {
@@ -32,8 +29,8 @@
     var followsPage = "http://pan.baidu.com/pcloud/friendpage?type=follow&uk=" + pageUK;
     var fansPage = "http://pan.baidu.com/pcloud/friendpage?type=fans&uk=" + pageUK;
 	var homePage = "http://pan.baidu.com/share/home?uk=" + pageUK;
-    if($('#share_nofound_des').length || href.match(/\/pcloud\/friendpage/)) {		
-        	$myPlace.panel.add($('<a href="/share/home?uk=' + pageUK + '">' + pageUK + '</a>')[0],1); 
+    if($myPlace.$('#share_nofound_des').length || href.match(/\/pcloud\/friendpage/)) {		
+        	$myPlace.panel.add($myPlace.$('<a href="/share/home?uk=' + pageUK + '">' + pageUK + '</a>')[0],1); 
 	}
 	$myPlace.panel.addSpace();
 	

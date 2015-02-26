@@ -15,14 +15,11 @@
 
 
 (function(){
-	if(typeof unsafeWindow == 'undefined') {
-    	var unsafeWindow = window;
-        window.unsafeWindow = window;
-    }
-    if(typeof $myPlace == 'undefined') {
-        var $myPlace = unsafeWindow.$myPlace;
-    }
-    var $ = $myPlace.jQuery; 
+	if(!unsafeWindow) {
+		unsafeWindow = window;
+	}
+	var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+	unsafeWindow.$myPlace = $myPlace;
 	var yun = $myPlace.baidu.yun;
 	var FileUtils = unsafeWindow.FileUtils;
 	var _L = yun.share._L;
@@ -158,9 +155,11 @@
 				return lists;
 			}
 			else {
-				data = FileUtils.SHARE_DATAS.currentChacheData;	
+				
+				data = Array.concat(FileUtils.SHARE_DATAS.currentChacheData);	
+				
 				for(var i=0;i<data.length;i++) {
-					if((!data[i].filelist) && data[i].operation.filelist) {
+					if((!data[i].filelist) && data[i].operation && data[i].operation.filelist) {
 						data[i].filelist = data[i].operation.filelist;
 					}
 					if(!data[i].filelist) {
@@ -177,15 +176,17 @@
 			return data;
 		},
 	};
-	$(document).ready(function(){
-        //var elements = $('inline-file-col');
+
+	document.addEventListener('DOMContentLoaded',function(){
+        //var elements = $myPlace.$('inline-file-col');
         //for(var i=0;i<elements.length;i++) {
-        	//$('<span>' + (i+1) + '</span>').insertBefore(elements[i]);
+        	//$myPlace.$('<span>' + (i+1) + '</span>').insertBefore(elements[i]);
         //}
-		var pos = $('#barCmdViewList')[0];
+
+		var pos = $myPlace.$('#barCmdViewList')[0];
 		if(pos) {
-			pos = $(pos.parentNode);
-			var btn1 = $('<li><button style="display:inline;height:29px;margin-right:5px" ' +
+			pos = $myPlace.$(pos.parentNode);
+			var btn1 = $myPlace.$('<li><button style="display:inline;height:29px;margin-right:5px" ' +
 				'title="' + _L('Save all page') + '" href="javascript:;" class="two-pix-btn">' + 
 				_L('Save all page') + 	'</button></li>');
 			btn1.click(function(){
@@ -193,7 +194,7 @@
 			});	
 			btn1.insertBefore(pos);
 			pos = btn1;
-			var btn2 = $('<li><button style="display:inline;height:29px;margin-right:5px" ' +
+			var btn2 = $myPlace.$('<li><button style="display:inline;height:29px;margin-right:5px" ' +
 				'title="' + _L('Save current page') + '" href="javascript:;" class="two-pix-btn">' + 
 				_L('Save current page') + 	'</button></li>');
 			btn2.click(function(){

@@ -10,7 +10,7 @@
 // @include     http://yun.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.02
+// @version     1.03
 // @grant none
 // Changelog
 //	2013-09-28
@@ -26,30 +26,34 @@ if(!unsafeWindow) {
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
-var $ = unsafeWindow.$ || $myPlace.jQuery;
+
+//alert('myplace.baidu.yun.common:' + $myPlace.jQuery);
 $myPlace.baidu = $myPlace.baidu || {};
 $myPlace.baidu.yun = $myPlace.baidu.yun || {};
-
+unsafeWindow.$BY = $myPlace.baidu.yun;
+		
 (function(d){
 	var disk = unsafeWindow.disk;
 	var FileUtils = unsafeWindow.FileUtils;
 	var Page = unsafeWindow.Page;
 	var Utilities = unsafeWindow.Utilities;
 	function fixpath(a) {
-		a = a.replace(/  >  /g,'/');
-		a = a.replace(/^\s*>\s*/g,'/');
+		a = a.replace(/[\s  ]*>[  \s]*/g,'/');
+		//a = a.replace(/^\s*>\s*/g,'/');
 		if(!a.match(/^\//)) {
 			a = '/' + a;
 		}
 		return a;
 	}
 	function readValue(key) {
-		return $('#' + key).attr("value");
+		return $myPlace.$('#' + key).attr("value");
 	}
 	function setValue(key,value) {
-		return $('#' + key).attr("value",value);
+		return $myPlace.$('#' + key).attr("value",value);
 	}
-	d.yun = {
+	
+	
+d.yun = {
 		LocaleStringMaps : {
 			'Target path:':'\u76ee\u6807\u8def\u5f84\uff1a',
 			'Selection filter(Regexp):':'\u9009\u62e9\u8fc7\u6ee4\u5668\uff08\u6b63\u5219\u8868\u8fbe\u5f0f\uff09\uff1a',
@@ -87,8 +91,16 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			'URI:':'\u94fe\u63a5(URI)\uff1a',
 			'Quick Save':'\u5feb\u901f\u4fdd\u5b58',
 			'Select pages range...':'Select pages range...',
-			
+			'Rename':'重命名',
+			'Error: No file selected':'错误: 没有选择文件或文件夹',
+			'Input regexp:':'匹配以下条件（正则表达式）：',
+			'Input replacement:':'替换为：',
+			'Move1'	: '移动1',
+			'Move2'	: '移动2',
+			'Move3'	: '移动3',
+			'Move4'	: '移动4',
 		},
+
 		_L : function(text,arg1,arg2,arg3,arg4){
 			var maps = d.yun.LocaleStringMaps;
 			if(typeof text == 'undefined') {
@@ -107,6 +119,39 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 			}
 			return t;
 		},
+		
+		message : function(msg,mode,sticky) {
+			var doc = unsafeWindow.document || document || window.document;
+			if(!doc) {
+				return false;
+			}
+			var msgId = 'baiduyun_services_msgbox';
+			var msgbox = doc.getElementById(msgId);
+			var text = '<font color="red">百度云: </font>' + msg;
+			if(!msgbox) {
+				msgbox = doc.createElement('div');
+				msgbox.id = msgId;
+				msgbox.addEventListener('click',function(){this.style.display='none';});
+				msgbox.setAttribute('style',
+					'z-index: 32768; ' 
+					+'position: fixed; top: 20px;'
+					+'text-align:center;display: block; padding: 10px;'
+					+'background-color:#ee7;color:#000;opacity:0.8;'
+				);
+				doc.body.appendChild(msgbox);
+			}
+			msgbox.innerHTML = text;
+			msgbox.style.display = 'block';
+			if(!sticky) {
+				setTimeout(function(){
+					if(msgbox) {
+						msgbox.style.display = 'none';
+					}
+				},3000);
+			}
+			return true;
+		},
+		
 		Utils	: {
 			doTasks : function(doer,tasks,idx,delay,callback) {
 				if(d.yun.Utils.doTasks.FORCESTOP) {
@@ -171,7 +216,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					}
 				}
 				else {
-					source = source.replace(/\^\^/g,'[\\s\\._\\-\\+]*'); //�ָ�����ݷ�ʽ
+					source = source.replace(/\^\^/g,'[\\s\\._\\-\\+]*'); //分隔符快捷方式
 					//alert(source);
 					var r = new RegExp(source,'i');
 					for(var i=0;i<all.length;i++) {
@@ -185,61 +230,6 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 				return files;
 			},
-		},
-		Messager : function(tag) {		
-			var r;
-			if(!(Utilities && Utilities.useToast)) {
-				var id  = 'xrlin_msg_area';
-				r = $('#' + id);
-				if(!r.length) {
-					var html = '<span style="display:none;height:29px;margin-right:30px;"  class="toast-content" id="' +
-							id + '"></span>';
-					if(tag) {
-						html = '<' + tag + '>' + html + '</' + tag + '>';
-					}
-					r = $(html);
-				}
-				r.ELEMENTID = id;
-				r.say = function(text) {
-					unsafeWindow.console.log(text);
-					var b = $('#' + this.ELEMENTID);
-					if(text && text!="") {
-						b.show();
-						b[0].innerHTML=text;
-					}
-					else {
-						b.hide();
-						b[0].innerHTML="";
-					}
-				};
-			}
-			else {
-				r = $('<span></span>');
-				r.say = function(text,mode) {
-					unsafeWindow.console.log(text);
-					var t = {
-						toastMode:	disk.ui.Toast.MODE_SUCCESS,
-						msg:		text,
-						sticky:		false
-					};
-					if(mode) {
-						switch(mode){
-							case 1:
-								t.toastMode = disk.ui.Toast.MODE_LOADING;
-								t.sticky = true;
-								break;
-							case 2:
-								t.toastMode = disk.ui.Toast.MODE_CAUTION;								
-								break;
-							case 3:
-								t.toastMode = disk.ui.Toast.MODE_FAILURE;
-								break;
-						}
-					}
-					Utilities.useToast(t);
-				};
-			}
-			return r;
 		},
 		URIDialog : function(path,uri) {
 			if(!path) path= {value:"/Incoming",id:'uridialog_path'};
@@ -271,8 +261,8 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					'" class="source_selection">' +
 					'<div class="hr"></div>'+
 					'</div>';
-			var element = $(html)[0];
-			$(element).appendTo($('#' + c._mMsgContentId));
+			var element = $myPlace.$(html)[0];
+			$myPlace.$(element).appendTo($myPlace.$('#' + c._mMsgContentId));
             c._mOnCancel = function() {
             	c.OnCancel && c.OnCancel(c);
             }
@@ -286,7 +276,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 			}
             c._mUI.pane.style.zIndex=12500;
-			var btn = $('#sd_button');
+			var btn = $myPlace.$('#sd_button');
 			var dd;
 			if(disk.ui.MoveSaveDialog) {
 				btn.click(function() {
@@ -296,7 +286,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					}
                     dd._mMoveSaveDialog._mUI.pane.style.zIndex=12501;
 					dd._mMoveSaveDialog.onConsent = function (D) {
-							$('#' + path.id).attr('value',D);
+							$myPlace.$('#' + path.id).attr('value',D);
 							c.setVisible(true);
 					}
 					c.setVisible(false);
@@ -329,8 +319,8 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					'<input style="height:20px;width:280px;margin-left:10px;" id="sd_source" type=text value="' + regexp + '" class="source_selection">' +
 					'<div class="hr"></div>'+
 					'</div>';
-			var element = $(html)[0];
-			$(element).appendTo($('#' + c._mMsgContentId));
+			var element = $myPlace.$(html)[0];
+			$myPlace.$(element).appendTo($myPlace.$('#' + c._mMsgContentId));
             c._mOnCancel = function() {
             	c.OnCancel && c.OnCancel(c);
             }
@@ -344,7 +334,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 				}
 			}
             c._mUI.pane.style.zIndex=12500;
-			var btn = $('#sd_button');
+			var btn = $myPlace.$('#sd_button');
 			var dd;
 			if(disk.ui.MoveSaveDialog) {
 				btn.click(function() {
@@ -355,7 +345,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 					}
                     dd._mMoveSaveDialog._mUI.pane.style.zIndex=12501;
 					dd._mMoveSaveDialog.onConsent = function (D) {
-							$('#sd_target').attr('value',D);
+							$myPlace.$('#sd_target').attr('value',D);
 							c.setVisible(true);
 					}
 					c.setVisible(false);
@@ -425,7 +415,7 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
 		},
         UI : {
             getHeader : function() {
-                var a = $('.homeheader');
+                var a = $myPlace.$('.homeheader');
                 if(a && a[0]) {
                     return a[0];
                 }
@@ -434,37 +424,30 @@ $myPlace.baidu.yun = $myPlace.baidu.yun || {};
                 }
             }
         },
-		Downloader : function(props) {
-			var self = this;
-			this.props = props;
-			this._button = function(text) {
-				return $('<li><button style="display:block;height:29px;margin-right:5px" ' +
-				'title="' + text + '" href="javascript:;" class="two-pix-btn">' + 
-				text + 	'</button></li>');
-			}
-			this.addButton = function(label,pos) {
-				if(!self.buttons) {
-					self.buttons = {};
-				}
-				self.buttons.push(label,pos);
-			}
-			this.ready = function(){
-				for(var i=0;i<self.buttons.length;i++) {
-					var n = $(self.buttons[i][1]);
-					var b = $(self._button(self.buttons[i][0]));
-					if(n.length && b.length) {
-						b.appendTo(n);
-						b.click(function() {
-							self.selectPath(function(A,B,C,D){
-								self.getList(self.saveFiles,b[0],A,B,C,D);
-							},b[0])
-						});
-					}
-				}
-			};
-			this.getList = function(callback,eventSource,A,B,C,D){
-			};
-			
-		},
 	};
+	
+	if(typeof(unsafeWindow.require) == 'function') {
+		var require = unsafeWindow.require;
+		var API = {
+			commonService : require("common:widget/commonService/commonService.js"),
+			toast : require("common:widget/toast/toast.js"),
+			dataCenter : require("common:widget/data-center/data-center.js"),
+		} ;
+		d.yun.API = API;
+		d.yun.MessageMode = {
+			SUCCESS	:	API.toast.obtain.MODE_SUCCESS,
+			FAILUE	:	API.toast.obtain.MODE_FAILUE,
+			CAUTION	:	API.toast.obtain.MODE_CAUTION,
+			LOADING :	API.toast.obtain.MODE_LOADING,
+		};
+		d.yun.message = function(msg,mode,sticky) {
+			return API.toast.obtain.useToast({
+						toastMode: mode ||  API.toast.obtain.MODE_SUCCESS,
+						msg: msg,
+						sticky: sticky || !1,
+			 })
+		};
+	}
+			
+	
 })($myPlace.baidu);
