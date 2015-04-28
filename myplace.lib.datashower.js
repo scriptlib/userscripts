@@ -2,7 +2,7 @@
 // @name           myplace.lib.datashower
 // @namespace      eotect@myplace
 // @description    myplace data shower library
-// @version		   1.2
+// @version		   1.21
 //Changelog
 //	2014-05-03
 //		Copy codes from the old myplace.imagealbum
@@ -28,6 +28,7 @@ if(!$myPlace.lib) {
 	debugPrint("[Start]" + Date());
 	var XRZPanel = $myPlace.panel;
 	var DOCHREF = document.location.href;
+	var DOCTITLE = document.title;
 	var ELMLINKS = document.getElementsByTagName('a');
 	var ELMIMGS = document.getElementsByTagName('img');
 	var DOCIMAGES = new Array();
@@ -74,8 +75,8 @@ if(!$myPlace.lib) {
 		var text = image.text;
 		var target = image.target;
 		var pt = target.parentNode || target;//document.body;
-		var pHref = pt.href || document.location.href || src;
-		var pText = pt.textContent || document.title;
+		var pHref = pt.href || DOCHREF || src;
+		var pText = pt.textContent || DOCTITLE;
 		if(!pText) {
 			pText = getBasename(pHref);
 		}
@@ -100,9 +101,14 @@ if(!$myPlace.lib) {
 		
 		var replace = image['replace'];
 		var top = pt.parentNode;
-		var tagname1 = target.tagName.toLowerCase();
-		var tagname2 = pt.tagName.toLowerCase();
-		
+		var tagname1 = '';
+		var tagname2 = '';
+		if(target && target.tagName) {
+			tagname1 = target.tagName.toLowerCase();
+		}
+		if(pt && pt.tagName) {
+			tagname2 = pt.tagName.toLowerCase();
+		}
 		if(tagname1 == 'img' && tagname2 == 'a') {
 			if(!href) {
 				href = pHref;

@@ -4,8 +4,7 @@
 // @description		MyPlace Google Mod
 // @include			*://www.google.*
 // @include			*://google.*
-// @version			1.01
-// @grant 		none
+// @version			1.02
 // ==/UserScript==
 
 if(!unsafeWindow) {
@@ -36,10 +35,12 @@ var panel=$myPlace.panel;
 			var count = myexps.length;
 			var Links=document.getElementsByTagName("a");
 			for (var i=0;i<Links.length;i++) {
-				//GM_log(Links[i].href);
+				GM_log(Links[i].href);
 				var href = Links[i].href;
+				Links[i].setAttribute("onmousedown","");
 				if(href){
-					Links[i].setAttribute("onmousedown","");
+					//href = href.replace(/^http/,'https');
+					Links[i].href = href;
 					var match = hrefexp.exec(href);
 					if(match) {
 						Links[i].href = unescape(match[1]);
@@ -95,7 +96,7 @@ var panel=$myPlace.panel;
 		},
 	};
 	
-	$(document).ready(function() {	
+	$myPlace.$(document).ready(function() {	
 		_.google.fixLinks();		
 	});
 	_.google.addClassicSwitch();

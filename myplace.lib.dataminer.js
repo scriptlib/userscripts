@@ -3,7 +3,7 @@
 // @namespace      xiaoranzzz
 // @description    Data Miner
 // @include        *
-// @version		   1.2
+// @version		   1.21
 // ==/UserScript==
 
 
@@ -216,12 +216,12 @@ if(!$myPlace.lib) {
 						}
 						else if(r.length != undefined) {
 							for(var j=0;j<r.length;j++) {
-								$.extend(r[j],property,{target:elements[i]});
+								$.extend(r[j],{target:elements[i]},property);
 							}
 							result = result.concat(r);
 						}
 						else {
-							$.extend(r,property,{target:elements[i]});
+							$.extend(r,{target:elements[i]},property);
 							result.push(r);
 						}
 					}

@@ -10,7 +10,7 @@
 // @include     http://yun.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.03
+// @version     1.04
 // @grant none
 // Changelog
 //	2013-09-28

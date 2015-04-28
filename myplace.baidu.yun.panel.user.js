@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name       myplace.baidu.yun.panel
 // @namespace  eotect@myplace
-// @version    1.02
+// @version    1.03
 // @description  enter something useful
 // @include     http://pan.baidu.com/pcloud/friendpage*
 // @include     http://pan.baidu.com/share/*

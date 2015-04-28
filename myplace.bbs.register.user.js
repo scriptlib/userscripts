@@ -6,7 +6,9 @@
 // @include		 http*://*/1register78.php*
 // @include		 http*://*mod=register*
 // @include			http*://*/forum/*register*.php*
-// @version		1.0
+// @include			http*://*fromuser=*
+// @include			http*://*fromuid=*
+// @version		1.01
 // @grant 		none
 // ==/UserScript==
 

@@ -6,7 +6,7 @@
 // @include		http://pan.baidu.com/pcloud/album/*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.02
+// @version     1.03
 // ==/UserScript==
 
 if(!unsafeWindow) {

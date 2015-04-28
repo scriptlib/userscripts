@@ -18,7 +18,7 @@
 // @include		*/html/*/
 // @include		
 // @exclude			*google.*
-// @version			1.02
+// @version			1.03
 // @grant 		none
 //
 // @changelog

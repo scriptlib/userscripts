@@ -100,9 +100,16 @@
 // @include http://ffffound.com/image/*
 // @include http://ffffound.com/home/*
 // @include http://*.tumblr.com/*
+// @include http://www.tetoxtreme.com/*
 // @include http://*.xingyun.cn/*
-// @version 1.12
+// @include http://www.aweipai.com/*
+// @include http://bbs.voc.com.cn/*
+// @include http://bbs.*/topic-*.html
+// @version 1.13
 //Changelog
+//	2015-04-26
+//		Add support for bbs.voc.com.cn, amazon.co.jp
+//		Add support for tieba.baidu.com
 //	2015-01-18
 //		Add support for wd.koudai.com
 //  2014-08-04
@@ -1017,11 +1024,20 @@
 
 	);
 */
-	$R('amazon\\.co\\.jp\/[^\/]+\/dp\/',
-		['.tiny img','src'],
-		'attr_replace',
-		[/\._SL\d+_AA\d+_\.jpg$/,'.jpg'],
-		{dialog:true}
+	M.addSite(/amazon\.co\.jp\/[^\/]+\/dp\//,
+		function(){
+			var res = document.documentElement.innerHTML;
+			var  m=res.match(/"hiRes":"[^"]+"/g)
+			var r = new Array;
+			for(var i =0;i<m.length;i++) {
+				var  t = m[i];
+				var  mm = t.match(/"hiRes":"([^"]+)"/);
+				if(mm) {
+					r.push({src:mm[1],target:document.body.firstChild});
+				}
+			}
+			return r;
+		}
 	);
 	$R('weipai\.cn',
 		['div img','src'],
@@ -1101,15 +1117,43 @@
 		);
 	})();
 
-	
+	function extract_tieba_baidu_com(img,src,props) {
+		var large = src;
+		large = large.replace(/forum\/[^\/]+\/sign=[^\/]+\//,'forum/pic/item/');
+		large = large.replace(/\/abpic\//,'/pic/');
+		if(props) {
+			return $.extend(props,{thumb:src,src:large});
+		}
+		else {
+			return {thumb:src,src:large};
+		}
+	}
 	//@SITE: http://tieba.baidu.com
+	$R(
+		'tieba\.baidu\.com\/p',
+		['a.ag_ele_a>img','src'],
+		function(img,src) {
+			return extract_tieba_baidu_com(img,src);
+		},null,
+		{no_cache_selector:true,loadmode:'Interative'}
+	);
+	//@SITE: http://tieba.baidu.com
+	$R(
+		'tieba\.baidu\.com\/f',
+		['a.aep_img_link>img,div.vpic_wrap>img','src'],
+		function(img,src) {
+			return extract_tieba_baidu_com(img,src);
+		},null,
+		{no_cache_selector:true,loadmode:'Interative'}
+	);
+	//*@SITE: http://tieba.baidu.com
 	$R(
 		'tieba\.baidu\.com',
 		['img.BDE_Image','src'],
-		'attr_replace',
-		[/forum\/[^\/]+\/sign=[^\/]+\//,'forum/pic/item/']
+		function(img,src) {
+			return extract_tieba_baidu_com(img,src,{href:DOCHREF,text:DOCTITLE});
+		}
 	);
-	
 	//@SITE: http://weibo.com
 	/*
 		M.register(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.com|weitu\.sdodo\.com/,
@@ -1361,7 +1405,7 @@
 		}
 	);
 	
-	M.addSite('tumblr\.com',
+	M.addSite('(?:tumblr\.com|tetoxtreme\.com)',
 		function() {
 			var docs = new Array();
 			docs.push(document);
@@ -1397,6 +1441,31 @@
 		}
 	);
 	
+	$R('aweipai\.com',
+		['article','class'],
+		function(article,cls) {
+			var elm = $('embed');
+			if(elm) {
+				var src = elm[0].src;
+				if(src) {
+					src = src.replace(/\/share\/flash\//,'/video/');
+					var p = article.getElementsByTagName('p')[0];
+					return {href:src,text:p.textContent,target:article};
+				}
+			}
+		}
+	);
+	
+	$R('(bbs\.voc\.com\.cn|bbs\.[^\/]+\/topic.+\.html)',
+		['img','src'],
+		function(img,src) {
+			if(src) {
+				if(src.match(/http:\/\/image\.hnol\.net\/c\/[^'"]+\.jpg$/)) {
+					return {src:src,text:DOCTITLE,href:DOCHREF};
+				}  
+			}
+		}
+	)
 	
 	//****************************************************
 	//Weak Rules

@@ -4,7 +4,7 @@
 // @description myplace.baidu.yun.wap
 // @include     http://pan.baidu.com/wap/*
 // @include     http://yun.baidu.com/wap/*
-// @version     1.02
+// @version     1.03
 // @grant       none
 // ==/UserScript==
 

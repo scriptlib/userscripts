@@ -4,7 +4,7 @@
 // @description 百度网盘文件管理
 // @include     http://pan.baidu.com/disk/home*
 // @include     http://yun.baidu.com/disk/home*
-// @version     2.02
+// @version     2.03
 // @grant 		none
 // Changelog
 // 2014-10-17
