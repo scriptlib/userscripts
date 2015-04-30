@@ -105,7 +105,7 @@
 // @include http://www.aweipai.com/*
 // @include http://bbs.voc.com.cn/*
 // @include http://bbs.*/topic-*.html
-// @version 1.13
+// @version 1.14
 //Changelog
 //	2015-04-26
 //		Add support for bbs.voc.com.cn, amazon.co.jp
@@ -1404,7 +1404,24 @@
 			return r;
 		}
 	);
-	
+	$R('tumblr\\.com\/archive',
+		['div.post','data-id'],
+		function(post,id) {
+			var tumblr = DOCHREF;
+			tumblr = tumblr.replace(/^(https?:\/\/[^\/]+).*$/,'$1');
+			var img = $(post).find('div.post_thumbnail_container');
+			var thumb;
+			if(img && img.length) {
+				thumb = img[0].getAttribute('data-imageurl');
+			}
+			var src = thumb.replace(/_\d+\.(jpg|gif|png)/,'_1280.$1')
+			if(thumb && id) {
+				return {src:src,thumb:thumb,href:tumblr + '/post/' + id};
+			}
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	);
 	M.addSite('(?:tumblr\.com|tetoxtreme\.com)',
 		function() {
 			var docs = new Array();

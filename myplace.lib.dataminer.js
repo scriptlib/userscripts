@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name           Data Miner
-// @namespace      xiaoranzzz
+// @namespace      eotect@myplace
 // @description    Data Miner
 // @include        *
-// @version		   1.21
+// @version		   1.22
 // ==/UserScript==
 
 
