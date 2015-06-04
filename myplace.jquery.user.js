@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name           myplace.jquery
-// @namespace      eotect.jquery@myplace
+// @namespace      eotect@myplace
 // @description    $myPlace.jQuery
-// @version		   1.13
+// @version		   1.14
 // @include        *
 // @require			http://code.jquery.com/jquery-1.10.2.min.js
 // @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
-// @grant 1none
+// @run-at			document-start
 // Changes log
 //	2013-09-29
 //		Remove @grant none, Run in sandbox.		
@@ -18,12 +18,15 @@ if(!unsafeWindow) {
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 unsafeWindow.$myPlace = $myPlace;
 
+jQuery.noConflict();
+
 (function(_){
-	if(unsafeWindow.jQuery) {
+	/*if(unsafeWindow.jQuery) {
 		_.jQuery = unsafeWindow.jQuery;
 		_.$ = unsafeWindow.jQuery;
 		return;
 	}
+	*/
 	if(_.jQuery) {
 		return;
 	}
@@ -34,7 +37,8 @@ unsafeWindow.$myPlace = $myPlace;
 		csslink.type ="text/css";
 		jQuery('head').append(csslink);
 		_.jQuery = jQuery;
-		_.$ = jQuery;
+		//_.jQuery = cloneInto(jQuery,$myPlace);
+		_.$ = _.jQuery;
 		//alert('myplace.jquery:'  + $myPlace.jQuery.fn.jquery);
 		//delete jQuery;
 	}

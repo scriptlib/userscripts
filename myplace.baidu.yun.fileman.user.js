@@ -57,27 +57,44 @@ unsafeWindow.$myPlace = $myPlace;
 				
 			});
 		},
-		rename:	function(file,exp,rpl,func) {
+		rename:	function(list,pos,end,exp,rpl,func) {
+			var progress = '[' + pos + '/' + end + ']';
+			if(pos>=end) {
+				console.log(progress + " 重命名任务完成");
+				yun.message(_L('Finished renaming $1 files',end),yun.MessageMode.MODE_SUCCESS);
+				return func(end);
+			}
+			var file = list[pos];
 			var oldname = file.server_filename;
 			var newname = oldname.replace(exp,rpl);
 			if(newname != oldname) {
-				console.log("Rename " + oldname + " => " + newname);
+				console.log(progress + " Rename " + oldname + " => " + newname);
 			}
 			else {
-				console.log('Rename ' + oldname + ' [Nothing to do]'); 
+				console.log(progress + ' Rename ' + oldname + ' [Nothing to do]'); 
+				setTimeout(function(){
+					yun.fileman.rename(list,pos+1,end,exp,rpl,func)
+				},2000);
+				return 1;
 			}
-			return DH.rename(file.fs_id,newname,func);
+			return DH.rename(file.fs_id,newname,function() {
+				setTimeout(function(){
+					yun.fileman.rename(list,pos+1,end,exp,rpl,func)
+				},2000);
+				return 1;
+			});
 		},
 	};
 	yun.actions = {
 		rename : function(exp,rpl) {
 			var list = yun.fileman.get_file_selected();
-			
+			/*
 			for(var i=0;i<list.length-1;i++) {
 				yun.fileman.rename(list[i],exp,rpl,function(){});
 			}
+			*/
 			if(list.length) {
-				return yun.fileman.rename(list[list.length-1],exp,rpl,function(){DH.render()});
+				return yun.fileman.rename(list,0,list.length,exp,rpl,function(){DH.render();return 1;});
 			}
 			else {
 				yun.message(_L('Error: No file selected'),yun.MessageMode.MODE_CAUTION);

@@ -10,7 +10,7 @@
 // @include     http://yun.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
-// @version     1.04
+// @version     1.05
 // @grant none
 // Changelog
 //	2013-09-28
@@ -46,10 +46,10 @@ unsafeWindow.$BY = $myPlace.baidu.yun;
 		return a;
 	}
 	function readValue(key) {
-		return $myPlace.$('#' + key).attr("value");
+		return document.getElementById(key).value;
 	}
 	function setValue(key,value) {
-		return $myPlace.$('#' + key).attr("value",value);
+		return document.getElementById(key).value = value;
 	}
 	
 	
@@ -99,6 +99,9 @@ d.yun = {
 			'Move2'	: '移动2',
 			'Move3'	: '移动3',
 			'Move4'	: '移动4',
+			'Refresh'	:'刷新',
+			'Input target destination:'	:'输入:目标文件夹',
+			'Finished renaming $1 files':'重命名了$1个文件',
 		},
 
 		_L : function(text,arg1,arg2,arg3,arg4){
@@ -329,6 +332,8 @@ d.yun = {
 				target = fixpath(readValue('sd_target'));
 				setValue('sd_target',target);
 				c.setVisible(false);
+				console.log('source=' + source);
+				console.log('target=' + target);
 				if(c.OnConsent) {
 					return c.OnConsent(source,target);
 				}
@@ -392,21 +397,26 @@ d.yun = {
 		Config : {
 			read	: function(key) {
 				var r;
+				var from;
 				if(!unsafeWindow.localStorage) {
+					from = 'Cookie';
 					r = Page.getCookie(key);
-					
 				}
 				else {
+					from = 'localStorage';
 					r = unsafeWindow.localStorage.getItem(key)
 				}
 					if(r) r = r.replace(/\s+$/g,'');
+				console.log('Config.Read: [' + from + ']' + key + "=" + r)
 				return r;
 			},
 			write	: function(key,value) {
 				if(!unsafeWindow.localStorage) {
+					console.log('Config.Write: [Cookie]' + key + "=" + value)
 					return Page.setCookie(key,value,100000);
 				}
 				else {
+					console.log('Config.Write: [localStorge]' + key + "=" + value)
 					return unsafeWindow.localStorage.setItem(key,value)
 				}
 			}

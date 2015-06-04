@@ -105,8 +105,16 @@
 // @include http://www.aweipai.com/*
 // @include http://bbs.voc.com.cn/*
 // @include http://bbs.*/topic-*.html
-// @version 1.14
+// @include http://*.163.com/photoview/*
+// @include http://pic.onlylady.com/*
+// @include http://www.meipai.com/*
+// @include http://www.miaopai.com/*
+// @include http://www.weishi.com/*
+// @include http://www.moodyz.com/actress/*
+// @version 1.190
 //Changelog
+//	2015-05-16
+//		Add support for miaopai.com,weishi.com
 //	2015-04-26
 //		Add support for bbs.voc.com.cn, amazon.co.jp
 //		Add support for tieba.baidu.com
@@ -553,11 +561,11 @@
 	M.reg(/http:\/\/blog\.sina\.com\.cn/,
 		['img','real_src'],
 		'attr_replace',
-		[/\/(orignal|bmiddle|middle|small|mw690)\//,'/orignal/'],
+		[/\/(orignal|bmiddle|middle|large|orignal|small|mw690)\//,'/large/'],
 		{dialog:true}
 	);
 	M.addImgSite(
-		/(small|bmiddle|middle|orignal)\//,"orignal/",false,
+		/\/(orignal|bmiddle|middle|large|orignal|small|mw690)\//,'/large/',false,
 		/photo.blog\.sina\.com\.cn/
 	);
 
@@ -782,7 +790,7 @@
 			if(!href) {
 				return false;
 			}
-			//GM_log(href);
+			//console.log(href);
 			var match = href.match(/imgurl=([^&]*)&imgrefurl=([^&]*)&/);
 			if(!match) {
 				return false;
@@ -999,17 +1007,18 @@
 		['\.[Jj][Pp][Gg]$'],
 		{dialog:true}
 	);
-	$R('amazon\\.co\\.jp\/s\/',
-		['div.celwidget','id'],
+	$R('amazon\\.co\\.jp.*\/s[\?\/]',
+		['div#atfResults li','id'],
 		function(elm,id) {
 			if(!id) return;
 			var j = $myPlace.jQuery(elm);
-			var cover = j.find('img.productImage')[0];
+			var cover = j.find('img.s-access-image')[0];
 			if(cover) {
+				var link = j.find('a.s-access-detail-page');
 			return {
 				src: cover.src.replace(/\.(?:_SL\d+_|_)AA\d+_\.jpg$/,'.jpg'),
-				href: cover.parentNode.parentNode.href,
-				text: j.find('.newaps a').text(),
+				href: link ? link[0].href : cover.parentNode.parentNode.href,
+				text: link ? link.text() : DOCTITLE,
 			};
 			}
 		}
@@ -1024,14 +1033,14 @@
 
 	);
 */
-	M.addSite(/amazon\.co\.jp\/[^\/]+\/dp\//,
+	M.addSite(/amazon\.co\.jp\/[^\/]+\/(?:dp|gp)\//,
 		function(){
 			var res = document.documentElement.innerHTML;
-			var  m=res.match(/"hiRes":"[^"]+"/g)
+			var  m=res.match(/"(?:hiRes|large)":"[^"]+"/g)
 			var r = new Array;
 			for(var i =0;i<m.length;i++) {
 				var  t = m[i];
-				var  mm = t.match(/"hiRes":"([^"]+)"/);
+				var  mm = t.match(/"(?:hiRes|large)":"([^"]+)"/);
 				if(mm) {
 					r.push({src:mm[1],target:document.body.firstChild});
 				}
@@ -1091,7 +1100,7 @@
 					attr = elm.getAttribute('src');
 					if(!attr) {
 						attr = elm.getAttribute('style');
-						GM_log('style:' + attr);
+						console.log('style:' + attr);
 						if(attr) {
 							var m = attr.match(/background-image:\s*url\s*\(\s*([^\)]+?)\s*\)/i);
 							attr = m ? m[1] : '';
@@ -1286,6 +1295,7 @@
 		function(elm,src) {
 			if(src) {
 				src = src.replace(/_\d+x\d+\.jpg$/,'');
+				console.log(src);
 				return {src:src,text:document.title};
 			}
 		}
@@ -1295,6 +1305,7 @@
 		['#description img','src'],
 		function(elm,src) {
 			if(src && src.match(/\/imgextra\//)) {
+				console.log(src);
 				return {src:src,text:document.title};
 			}
 		},
@@ -1302,13 +1313,42 @@
 		{no_cache_selector:true}
 	);
 	
+	$R('detail\.tmall\.com\/item',
+		['ul.tb-thumb li img','src'],
+		function(elm,src) {
+			if(src) {
+				var thumb = src;
+				src = src.replace(/_\d+x\d+(?:\.jpg|q\d+\.jpg)$/,'');
+				return {src:src,thumb:thumb,text:DOCTITLE};
+			}
+		},
+		null,
+		{no_cache_selector:true}
+	);
+	$R('detail\.tmall\.com\/item',
+		['div.content img','src'],
+		function(elm,src) {
+			var ks = elm.getAttribute('data-ks-lazyload');
+			if(ks) {
+				src = ks;
+			}
+			if(src) {
+				var thumb = src;
+				src = src.replace(/_\d+x\d+(?:\.jpg|q\d+\.jpg)$/,'');
+				return {src:src,thumb:thumb,text:DOCTITLE};
+			}
+		},
+		null,
+		{no_cache_selector:true}
+	);
+	
 	function extract_qvod(text) {
-		GM_log("Text:" + text);
+		console.log("Text:" + text);
 		if(!text) return [];
 		var links = [];
 		if(typeof(text) == 'string') {
 			text = decodeURIComponent(text);
-			GM_log("LINK:" + text);
+			console.log("LINK:" + text);
 			//bdhd://591151719|764A8F073E149B2A476C404CE119CE36|一夜情深BD版.rmvb|
 			var exp =/((?:bdhd|qvod):\/\/[^\|]+\|[^\|]+\|[^\|]+\|?|jjhd:\/\/[^\|]+\|[^\|]+\|[^\+\|]+)/g; 
 			var m;
@@ -1324,7 +1364,7 @@
 		}
 		else {
 			for(var prop in text) {
-				GM_log("Prop: " + prop);
+				console.log("Prop: " + prop);
 				var slinks = extract_qvod(text[prop]);
 				if(slinks.length) {
 					links = links.concat(slinks);
@@ -1345,7 +1385,7 @@
 					'url_list',
 					'playdata'
 			]) {
-				GM_log(prop + " = " + unsafeWindow[prop]);
+				console.log(prop + " = " + unsafeWindow[prop]);
 				var links = extract_qvod(unsafeWindow[prop]);
 				for(var i=0;i<links.length;i++) {
 					results.push({href:links[i],text:links[i]});
@@ -1432,20 +1472,33 @@
 					docs.push(ifrs[i].contentDocument);
 				}
 			}
-
 			var r = new Array();
 			for(var j=0;j<docs.length;j++) {
 				var imgs = docs[j].getElementsByTagName('img');
 				for(var i=0;i<imgs.length;i++) {
+					var pa = imgs[i].parentNode;
 					var src = imgs[i].src;
-					if(src && src.match(/_\d+\.(?:jpg|gif)$/)) {
-						src = src.replace(/_250\.(jpg|gif)$/,'_500.$1');
-						r.push({src:src,href:document.location.href,text:document.title});
+					var thumb = src;
+					if(!src) {
+						continue;
+					}
+					else if(pa.nodeName.toLowerCase() == 'a') {
+						var href = pa.href;	
+						if(href && href.match(/_\d+\.(?:jpg|png|gif)$/)) {
+							console.log(href);
+							src = href;
+						}
+					}
+					if(src.match(/\/avatar_|_avatar\/|default_avatar/)) {
+						continue;
+					}
+					else if(src.match(/_\d+\.(?:jpg|png|gif)$/)) {
+						src = src.replace(/_250\.(jpg|gif|png)$/,'_500.$1');
+						r.push({src:src,thumb:thumb,href:DOCHREF,text:DOCTITLE});
 					}
 				}
 			}
 			return r;
-
 		},
 		false,
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
@@ -1483,6 +1536,56 @@
 			}
 		}
 	)
+	$R('[^\.]+\.163\.com\/photoview\/',
+		['textarea[name="gallery-data"]','name'],
+		function(textarea) {
+			var r = new Array;
+			var text = textarea.value;
+			var oimg = text.match(/"oimg":\s*"[^"]+"/g);
+			for(let i=0;i<oimg.length;i++) {
+				var img = oimg[i];
+				var src = img.match(/:\s*"([^"]+)"/);
+				if(src) {
+					r.push({src:src[1],href:DOCHREF,text:DOCTITLE});
+				}
+			}
+			return r;
+		}
+	);
+	
+	$R('pic\.onlylady\.com',
+		['#thumb img','src'],
+		'attr_replace',
+		['90x64','985x695']
+	);
+	
+	$R('meipai\.com',
+		['li>img','src'],
+		function(img,thumb) {
+			if(thumb) {
+				var src = thumb.replace(/!thumb\d+$/,'');
+				return {src:src,thumb:thumb};
+			}
+		}
+	);
+	$R('miaopai\.com',
+		['div.video_img img','src'],
+		'attr_set',
+		null,
+		{no_cache_selector:true,linkpage:1}
+	);
+	$R('weishi\.com',
+		['div.js_img img','src'],
+		'attr_set',
+		null,
+		{no_cache_selector:true,loadmode:'Interative',linkpage:1}
+	);
+	$R('www\.moodyz\.com\/actress\/',
+		['li.actress table a img', 'src'],
+		'attr_replace',
+		[/pt\.jpg$/,'pl.jpg']
+	);
+		
 	
 	//****************************************************
 	//Weak Rules

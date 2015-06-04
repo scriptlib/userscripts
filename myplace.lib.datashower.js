@@ -602,21 +602,26 @@ if(!$myPlace.lib) {
 		var nvPanel = document.getElementById("xrlin_imgAlbum");
 		if (nvPanel == null) {
 			elm.innerHTML = ALBUM_TEXT_OPENED + count;
-			nvPanel = loadPage(1);
+			nvPanel = loadPage(1,1);
+			nvPanel.style.display = 'none';
 		}
-		else {
+
 			var show = nvPanel.style.display;
 			if(show == 'none') {
 				nvPanel.style.display = "block";
+				document.body.style.overflow = 'hidden';
 				elm.innerHTML = ALBUM_TEXT_OPENED + count ;
 				$(nvPanel).dialog('open');
+				
 			}
 			else {
 				nvPanel.style.display = "none";
+				document.body.style.overflow = 'scroll';
 				elm.innerHTML = ALBUM_TEXT_CLOSED + count;  
 				$(nvPanel).dialog('close');
+				
 			}
-		}
+
 	}
 	function start() {
 		if(!DOCHREF) {

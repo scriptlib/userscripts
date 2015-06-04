@@ -117,6 +117,7 @@ var XRZPanel = $myPlace.panel;
 	register_exp(/pornothon\.net\/[^\/]+\//,/\/\d+-[^-]+-[^-]+-.+\.html/);
 	register_exp(/\/thread-htm-fid/,/\/read-htm-tid-\d+\.html/);
 	register_exp(/\/thread\.php\?fid/,/\/read-htm-tid-\d+\.html/);
+	register_exp(/\/bbs\/thread-\d+/,/\/bbs\/read-\d+$/)
 	
 	for(var i=0;i<filters.length;i++) {
 		var f = filters[i];

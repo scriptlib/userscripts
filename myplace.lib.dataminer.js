@@ -96,7 +96,12 @@ if(!$myPlace.lib) {
 			if(!attr) return false;
 			for(var $idx=0;$idx<args.length-1;$idx +=2) {
 				if(attr.match(args[$idx])) {
-					return {src: attr.replace(args[$idx],args[$idx+1])};
+					var large = attr.replace(args[$idx],args[$idx+1]);
+					var thumb;
+					if(attr.match(/\.jpg$/)) {
+						thumb = attr;
+					}
+					return {src: large, thumb:thumb};
 				}
 			}
 			return false;
@@ -266,7 +271,11 @@ if(!$myPlace.lib) {
 		};
 		
 		
-		this.addSite = function(exp,funGet,show) {
+		this.addSite = function(exp,funGet,show,props) {
+			if(!props) {
+				props = {};
+			}
+			props.showtable = show;
 			return this.register(
 				exp,
 				[document.documentElement.firstChild,'tagName'],
@@ -274,7 +283,7 @@ if(!$myPlace.lib) {
 					return funGet(DOC_HREF,doc);
 				},
 				null,
-				{showtable:show}
+				props
 			);
 		};
 		

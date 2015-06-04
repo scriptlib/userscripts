@@ -4,7 +4,7 @@
 // @description		MyPlace Google Mod
 // @include			*://www.google.*
 // @include			*://google.*
-// @version			1.02
+// @version			1.03
 // ==/UserScript==
 
 if(!unsafeWindow) {
@@ -35,7 +35,7 @@ var panel=$myPlace.panel;
 			var count = myexps.length;
 			var Links=document.getElementsByTagName("a");
 			for (var i=0;i<Links.length;i++) {
-				GM_log(Links[i].href);
+				console.log(Links[i].href);
 				var href = Links[i].href;
 				Links[i].setAttribute("onmousedown","");
 				if(href){
