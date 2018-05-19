@@ -10,6 +10,14 @@
 // @include     http://yun.baidu.com/disk/home*
 // @include     http://pan.baidu.com/s/*
 // @include     http://yun.baidu.com/s/*
+// @include     https://yun.baidu.com/share/*
+// @include     https://pan.baidu.com/share/*
+// @include     https://yun.baidu.com/pcloud/album/*
+// @include		https://pan.baidu.com/pcloud/album/*
+// @include     https://pan.baidu.com/disk/home*
+// @include     https://yun.baidu.com/disk/home*
+// @include     https://pan.baidu.com/s/*
+// @include     https://yun.baidu.com/s/*
 // @version     1.05
 // @grant none
 // Changelog
@@ -38,6 +46,7 @@ unsafeWindow.$BY = $myPlace.baidu.yun;
 	var Page = unsafeWindow.Page;
 	var Utilities = unsafeWindow.Utilities;
 	function fixpath(a) {
+		a = a.replace(/%2F/g,'/');
 		a = a.replace(/[\s  ]*>[  \s]*/g,'/');
 		//a = a.replace(/^\s*>\s*/g,'/');
 		if(!a.match(/^\//)) {
@@ -96,12 +105,18 @@ d.yun = {
 			'Input regexp:':'匹配以下条件（正则表达式）：',
 			'Input replacement:':'替换为：',
 			'Move1'	: '移动1',
-			'Move2'	: '移动2',
-			'Move3'	: '移动3',
-			'Move4'	: '移动4',
+			'Move2'	: '2',
+			'Move3'	: '3',
+			'Move4'	: '4',
+			'Move5'	: '5',
+			'Move6'	: '6',
+			'Move7'	: '7',
+			'Move8'	: '8',
+			'BS Move' : '超级移动',
 			'Refresh'	:'刷新',
 			'Input target destination:'	:'输入:目标文件夹',
 			'Finished renaming $1 files':'重命名了$1个文件',
+			'Finished moving $1 files':'移动了$1个文件',
 		},
 
 		_L : function(text,arg1,arg2,arg3,arg4){
@@ -439,23 +454,28 @@ d.yun = {
 	if(typeof(unsafeWindow.require) == 'function') {
 		var require = unsafeWindow.require;
 		var API = {
-			commonService : require("common:widget/commonService/commonService.js"),
-			toast : require("common:widget/toast/toast.js"),
-			dataCenter : require("common:widget/data-center/data-center.js"),
+			context : require("system-core:context/context.js"),
+//			commonService : require("common:widget/commonService/commonService.js"),
+//			control : require("disk-system:widget/system/util/message.js"),
+//			dataCenter : require("common:widget/data-center/data-center.js"),
+			page : require("system-core:system/uiService/page/page.js"),
+			fileManager : require("disk-system:widget/system/fileService/fileManagerApi/fileManagerApi.js"),
+			message : require("system-core:system/baseService/message/message.js"),
 		} ;
 		d.yun.API = API;
 		d.yun.MessageMode = {
-			SUCCESS	:	API.toast.obtain.MODE_SUCCESS,
-			FAILUE	:	API.toast.obtain.MODE_FAILUE,
-			CAUTION	:	API.toast.obtain.MODE_CAUTION,
-			LOADING :	API.toast.obtain.MODE_LOADING,
+			SUCCESS	:	'success',
+			FAILUE	:	'failue',
+			CAUTION	:	'caution',
+			LOADING :	'loading',
 		};
 		d.yun.message = function(msg,mode,sticky) {
-			return API.toast.obtain.useToast({
-						toastMode: mode ||  API.toast.obtain.MODE_SUCCESS,
-						msg: msg,
-						sticky: sticky || !1,
-			 })
+			return API.context.instanceForSystem.ui.tip({
+					msg: msg,
+					mode: mode || 'caution',
+					autoClose: !sticky,
+					hahClose: 1,
+			});
 		};
 	}
 			

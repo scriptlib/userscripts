@@ -20,7 +20,7 @@ unsafeWindow.$myPlace = $myPlace;
 	const SEPARATOR_TEXT="&nbsp;&nbsp;";// &nbsp; &nbsp;";
 	const PANEL_CONTROL_ID = 'xrlin_panel_control';
 		function  debugPrint(text) {
-			return;
+			/*
 			if(console) {
 				console.log("Eotect Golbal Panle:" + text)
 			}
@@ -28,6 +28,7 @@ unsafeWindow.$myPlace = $myPlace;
 				//GM_log("Eotect Golbal Panel:" + text);
 			}
 			return true;
+			*/
 		}
 		
 	var XRZPanel = {
@@ -140,6 +141,11 @@ unsafeWindow.$myPlace = $myPlace;
 		addSpace : function(count) {
 			if(this.DOMBox) {
 				var separator = document.createElement("span");
+				var prepend;
+				if(count < 0) {
+					count = -count;
+					prepend = 1;
+				}
 				if(count) {
 					var space = '';
 					for(var i=0;i<count;i++) {
@@ -150,7 +156,12 @@ unsafeWindow.$myPlace = $myPlace;
 				else {
 					separator.innerHTML = SEPARATOR_TEXT;
 				}
-				return this.DOMBox.appendChild(separator);
+				if(prepend) {
+					return this.DOMBox.insertBefore(separator,this.DOMBox.firstChild);
+				}
+				else {
+					return this.DOMBox.appendChild(separator);
+				}
 			}
 			return null;
 		},

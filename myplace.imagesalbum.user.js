@@ -111,6 +111,9 @@
 // @include http://www.miaopai.com/*
 // @include http://www.weishi.com/*
 // @include http://www.moodyz.com/actress/*
+// @include	http://www.socialtopgirl.com/*
+// @include http://m.weibo.cn/*
+// @include https://m.weibo.cn/*
 // @version 1.190
 //Changelog
 //	2015-05-16
@@ -800,8 +803,12 @@
 			if(!tmatch) {
 				tmatch = text.match(/"pt":"([^"]+)/);
 			}
+			var src = unescape(match[1]);
+			if(src.match(/^http:\/\/(?:i.imgur.com|greenpiccs.com)/,'i')) {
+				src = src.replace(/^http:/,'https:','i');
+			}
 			return {
-				src: unescape(match[1]),
+				src: src,
 				href: unescape(match[2]),
 				text: (tmatch ? tmatch[1] : ''),
 			};
@@ -980,10 +987,17 @@
 	//	['img','src'],
 		['.uiMediaThumbImg','style'],
 		'attr_replace',
-		[/.*(https?:\/\/.+)_n\.jpg.*$/,'/$1_o.jpg'],
+		[/.*(https?:\/\/.+)_n\.jpg.*$/,'$1_o.jpg'],
 	//	[/((s|p)\d+x\d+\/)?([^\/]+)_n\.jpg$/,'$3_o.jpg'],
-		{dialog:true}
+		{no_cache_selector:true,loadmode:'Interative'}
 	);
+	$R('facebook\.com\/photo\.php',
+		['img.spotlight','src'],
+		'attr_set',
+		null,
+		{no_cache_selector:true,loadmode:'Interative'}
+	);
+
     $R('oisinbosoft\\.com',
        ['#detail_simg a','href'],
        'attr_set',
@@ -1172,6 +1186,26 @@
 		 {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	);
 	*/
+	$R('video\.weibo\.com\/show\?',
+		['img','src'],
+		'attr_set',
+		null,
+		{no_cache_selector:true}
+	);
+	$R('weibo\.com\/p\/',
+		['div.WBA_content img','src'],
+		function(img,src) {
+			if(src) {
+				var thumb = src;
+				src = src.replace(/\/(?:bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg|png)$/,"/large/$1.$2");
+				thumb = src.replace(/\/large\//,'/bmiddle/');
+				return {src:src,thumb:thumb};
+			}
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	);
+		
 	$R('weibo\.com',
 		['.WB_feed_type','mid'],
 		function(list,mid){
@@ -1180,32 +1214,48 @@
 			var $= $myPlace.jQuery;
 			
 			var detail = $(list).find('.WB_detail');
-			if(!detail) return;
+			var text;
+			var href;
+			var title;
+			var images;
 			
-			var imgelms = detail.find('img');
-			if(!imgelms) {
+			if(!detail.length) return;
+			
+			var imgelms = detail.find('ul.WB_media_a li img');
+			if(!imgelms.length) {
+				imgelms.detail.find('img');
+			}
+			if(!imgelms.length) {
 				return;
 			}
 			
 			var jtext = detail.find('.WB_text');
-			if(!jtext) return;
-			var text = jtext.text().replace(/^[　\s\n\r]+/,'');
-			text = text.replace(/[　\s\n\r]+$/,'').replace(/[　\s\n\r]+/,' ','mg')
+			if(jtext.length) {
+				text = jtext.text().replace(/^[　\s\n\r]+/,'');
+				text = text.replace(/[　\s\n\r]+$/,'').replace(/[　\s\n\r]+/,' ','mg');
+			}
+			else {
+				text = '';
+			}
 			
 			
-			var jlink = detail.find('.WB_from .S_txt2');;
-			if(!jlink) return;			
-			var href = jlink[0].href;
-					
-			var title = document.title;
+			var jlink = detail.find('.WB_from .S_txt2');
+			if(jlink.length) {
+				href = jlink[0].href;
+			}
+			else {
+				href = DOCHREF;
+			}
+			
+			title = DOCTITLE;
 			title = title.replace(/\|[^\|]+$/,'');
 			
-			var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(?:gif|jpg)$/;
+			var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg)$/;
 			var images = new Array();
 			for(var i=0;i<imgelms.length;i++) {
 				var src = imgelms[i].src;
 				if(src && src.match(imgexp)) {
-					images.push([src.replace(imgexp,'/large/$2.jpg'),src.replace(imgexp,'/bmiddle/$2.jpg')]);
+					images.push([src.replace(imgexp,'/large/$2.$3'),src.replace(imgexp,'/bmiddle/$2.jpg')]);
 				}
 			}
 			return {
@@ -1218,6 +1268,7 @@
 		null,
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	);
+
 	$R('pp\.163\.com',
 		['.pic-area img.z-tag','data-lazyload-src'],
 		function(elm,src) {
@@ -1584,6 +1635,13 @@
 		['li.actress table a img', 'src'],
 		'attr_replace',
 		[/pt\.jpg$/,'pl.jpg']
+	);
+
+
+	M.addImgSite(
+		/\/thumbs\//,
+		"/",false,
+		/socialtopgirl\.com/
 	);
 		
 	

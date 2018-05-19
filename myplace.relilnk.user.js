@@ -12,6 +12,12 @@
 // @include	http://nikkanerog.com/*
 // @include	http://panpilog.com/*
 // @include 	http://www.erogazo-jp.net/*
+// @include https://mitaohui.net/*
+// @include http://mitaohui.net/*
+// @include http://clickme.net/*
+// @include https://clickme.net/*
+// @include http://*.tumblr.com/*
+// @include https://*.tumblr.com/*
 // @version     1.1
 // @grant       none
 // ==/UserScript==
@@ -43,13 +49,17 @@ if(typeof $myPlace.relink == 'undefined') {
 	d.sites = [];
 	
 	function start() {
+		console.log('RELINK for ' + HREF);
 		for(var i=0;i<d.sites.length;i++) {
 			var s = d.sites[i];
+			console.log('RELINK do ' + s.name);
 			if(s.disable) {
+				console.log('RELINK ' + s.name + ' disabled');
 				continue;
 			}
 			else if(s.target) {
 				if(!HREF.match(s.target)) {
+					console.log('RELINK ' + s.name + ' not match');
 					continue;
 				}
 			}
@@ -72,6 +82,8 @@ if(typeof $myPlace.relink == 'undefined') {
 	function A(target,relink) {
 		var def = {target:target};
 		def.name = target;
+		console.log('RELINK add definition for ' + def.name);
+				
 		var tf = typeof(relink);
 		if(tf == 'function') {
 			def.relinks = function(links,doc) {
@@ -82,7 +94,7 @@ if(typeof $myPlace.relink == 'undefined') {
 				}
 			};
 		}
-		else if(tf == 'object' && tf.length) {
+		else if(tf == 'object' && relink.length) {
 			def.relinks = function(links,doc) {
 				for(var i=0;i<links.length;i++) {
 					if(links[i].href) {
@@ -145,8 +157,18 @@ if(typeof $myPlace.relink == 'undefined') {
 	A(/blog-entry-\d+/,
 		[/fc2\.com/,'fc2blog.us']
 	);
+	A(/mitaohui\.net/,
+		[/http:\/\/mitaohui\.net/,'https://mitaohui.net']
+	);
+	A(/clickme\.net/,
+		[/http:\/\/cdn\.clickme\.net/,'https://cdn.clickme.net']
+	);
+	A(/tumblr\.com/,
+		[/http:\/\/([^\.]+)\.tumblr.com/,'https://$1.tumblr.com']
+	);
 	
 d.start = start;
 d.A = A;	
-DOC.addEventListener('load',start);
+DOC.addEventListener('DOMContentLoaded',start);
 })($myPlace.relink);
+

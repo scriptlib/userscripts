@@ -573,6 +573,15 @@ if(!$myPlace.lib) {
 			});
 			contPanel.appendChild(li);
 		}
+		for(var curPage=PAGESIZE*(idxPage-1);curPage<maxPage;curPage++) {
+			var li = document.createElement('li');
+			var a = document.createElement('a');
+			a.href =  DOCIMAGES[curPage].src || DOCIMAGES[curPage].href;
+			a.innerHTML = a.href;
+			li.appendChild(a);
+			contPanel.appendChild(li);
+		}
+		
 		nvHolder.appendChild(contPanel);
 		createIndexPanel(idxPage,PAGECOUNT,nvHolder); 
 		nvPanel.appendChild(nvHolder);
@@ -773,7 +782,7 @@ if(!$myPlace.lib) {
 				}
 			}
 		
-			XRZPanel.add(my_control);
+			XRZPanel.add(my_control,1);
 		   //     XRZPanel.addSpace();
 			XRZPanel.show();
 			//loadPage(1,true);

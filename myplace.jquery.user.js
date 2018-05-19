@@ -4,8 +4,8 @@
 // @description    $myPlace.jQuery
 // @version		   1.14
 // @include        *
-// @require			http://code.jquery.com/jquery-1.10.2.min.js
-// @require			http://code.jquery.com/ui/1.10.2/jquery-ui.min.js
+// @require			https://code.jquery.com/jquery-1.10.2.min.js
+// @require			https://code.jquery.com/ui/1.10.2/jquery-ui.min.js
 // @run-at			document-start
 // Changes log
 //	2013-09-29
@@ -32,7 +32,7 @@ jQuery.noConflict();
 	}
 	else if(jQuery) {
 		var csslink = document.createElement('link');
-		csslink.href = "http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css";
+		csslink.href = "https://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css";
 		csslink.setAttribute('rel',"stylesheet");
 		csslink.type ="text/css";
 		jQuery('head').append(csslink);

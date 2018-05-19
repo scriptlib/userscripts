@@ -1,0 +1,157 @@
+<html>
+<body>
+<script>
+function new_dialog(id,title,configs) {
+	var html = '<div style="background-color: black; margin-bottom: 5px;padding-left:5px"><span style="color: white; ">'
+		+title + '</span></div>'
+		+'<div id="' + id + '_content"></div>'
+		+'<div id="myplace.dialog.config.command" style="padding: 5px; text-align: right;">'
+		+'<input id="'+ id + '_cancel" style="width:60px" value="Cancel" type="button">'
+		+ '<input id="'+ id + '_ok" style="margin-left: 10px; width: 70px;" value="OK" type="button">'
+		+'</div>';
+	var dialog = document.createElement('div');
+	dialog.innerHTML = html;
+	dialog.setAttribute('style',"width:400px;top: 25%; left: 30%; border: 1px solid; position: fixed;padding:0px");
+	dialog.setAttribute('id',id);
+	dialog.id = id;
+	dialog.hidden = true;
+	var s = {
+		dialog: dialog,
+		id: id,
+		title: title,
+		show: function(){dialog.hidden = false;},
+		hide: function(){dialog.hidden = true;},
+		add: function(name,value) {
+			var dp = document.getElementById(id + '_content');
+			var ci = document.createElement('li');
+			ci.innerHTML = name + '<br/><input name="' + name + '" style="width:100%;padding:5px" type=text value="' + value + '">';
+			ci.setAttribute('style','padding:5px;');
+			dp.appendChild(ci);
+			if(!s.configs) {
+				s.configs = {};
+			}
+			s.configs[name] = value;
+		},
+		read: function() {
+			var dp = document.getElementById(id + '_content');
+			var inputs = dp.getElementsByTagName('input');
+			var r = {};
+			for(var i =0;i<inputs.length;i++) {
+				r[inputs[i].name] = inputs[i].value;
+			}
+			return r;
+		},
+		_onCancel : function(){
+			s.hide();
+			var dp = document.getElementById(id + '_content');
+			var inputs = dp.getElementsByTagName('input');
+			for(var i =0;i<inputs.length;i++) {
+				for(var j in s.configs) {
+					if(inputs[i].name == j) {
+						inputs[i].value = s.configs[j];
+					}
+				}
+			}
+			if(s.onCancel) {
+				s.onCancel();
+			}
+			else {
+				alert('Cancel');
+			}
+		},
+		_onOK : function(){
+			s.hide();
+			if(s.onOK) {
+				var dp = document.getElementById(id + '_content');
+				var inputs = dp.getElementsByTagName('input');
+				if(!s.configs) {
+					s.configs = {};
+				}
+				for(var i =0;i<inputs.length;i++) {
+					s.configs[inputs[i].name] = inputs[i].value;
+				}
+				return s.onOK(s.configs);
+			}
+			else {
+				alert('OK');
+			}
+		},
+		load: function(show){
+			document.body.appendChild(dialog);
+			var btn = document.getElementById(id + '_cancel');
+			btn.onclick = s._onCancel;
+			btn = document.getElementById(id + '_ok');
+			btn.onclick = s._onOK;
+			if(show) {
+				s.show();
+			}
+			else {
+				s.hide();
+			}
+		},
+		unload: function(){
+			this.parentNode.removeChild(dialog);
+		},
+	};
+	s.load(false);
+	for(var i in configs) {
+		s.add(i,configs[i]);
+	}
+	return s;
+}
+</script>
+<pre>
+#FOLLOWS!#paike_5aljkb2xnz	³ÎĞ¡ÍÃAnnie
+#FOLLOWS!#paike_f0ataiy4d0	º«ê¿âùSummer
+#FOLLOWS!#paike_5ih56mclzx	ÌÒ×Ó¾ÍÊÇĞ¡ÌÒºìºìºì
+#FOLLOWS!#qqsso_eb0u7626un	ÕÅÒ¯baby
+#FOLLOWS!#paike_3jgu16h5yd	ÃÀÄİMuMu
+#FOLLOWS!#paike_u30h3nhuzv	ÃÀÈËô~
+#FOLLOWS!#paike_njt0as90l0	ÄûÃÊ_lemon
+#FOLLOWS!#qqsso_fswzogvhyf	æÂlady
+#FOLLOWS!#qqsso_sfuskxk39g	ºìÈË¹İ
+#FOLLOWS!#paike_vpvlkqkqcc	ÕÅèò·Æ-ManGo
+#FOLLOWS!#paike_jwdym6jd57	Áõ³¿Â¶Merry
+#FOLLOWS!#paike_fxiw1u6tg0	CYÑŞ
+#FOLLOWS!#paike_x5wzwni3mb	ÍõĞ¡çåelva
+#FOLLOWS!#paike_1ktrqsi02m	Alina_ÁÖ·ã
+#FOLLOWS!#paike_fk63ra5rbn	ÁÖì§Èï
+#FOLLOWS!#paike_uipyja92du	³ÂÃÀÁÕMandy
+#FOLLOWS!#paike_enku9jt2p7	Ä¸ÆäÃÖÑÅ
+#FOLLOWS!#paike_ujhu7nuqyi	ÍõÏ£Ï£
+#FOLLOWS!#paike_rbsnsdpfhr	ÈôÒ¶Akashi
+#FOLLOWS!#paike_se7ycts5u5	ÍõÏ£Ï£
+#FOLLOWS!#paike_rvfgoifscr	º«âBÄ­
+#FOLLOWS!#paike_0exept7tbi	ÕÅÜ°Óè
+#FOLLOWS!#paike_u8q7epvtty	Èöµ©ÌğĞÄ_Ellia
+#FOLLOWS!#paike_l5bq30b16p	____¶­Ò¯
+#FOLLOWS!#qqsso_j2c9nhyppw	#Reposter/ÁÖÃÃÃÃl
+#FOLLOWS!#paike_wu223fm7g2	ÇÇ²ÊåûGyochaeyeon	Adela_chiang
+#FOLLOWS!#paike_1b8b2ctz5p	ÍõÜ°äômilla
+#FOLLOWS!#paike_lwu0isvzuh	ÃëÅÄÅ®Éñ
+#FOLLOWS!#paike_nmw4ak8zpc	ºÎĞı¾ı¾ı
+#FOLLOWS!#paike_z4b5p0xv1w	ÌïÃÎÏ£kitty
+#FOLLOWS!#paike_su4xx546th	ÖÜ×ÓÅµ
+#FOLLOWS!#paike_5ouxt6l5yn	ÄÈÒÀÁé¶ù
+#FOLLOWS!#paike_jmoklnr2ja	ÏÄÍñÍñBonnie
+#FOLLOWS!#paike_4ctyd2kf70	¹ËĞÀâù
+#FOLLOWS!#paike_oovjoecsqp	Áõ¼Îçùcherry
+#FOLLOWS!#paike_0iw60cv3yt	ç²Àï¼Îula
+#FOLLOWS!#paike_bsr3bk99mj	ÃÉÀöÒÁ
+#FOLLOWS!#paike_mw4e2kmdp7	AmaĞ¡ºüÏÉ¶ù
+#FOLLOWS!#paike_jxi1315k7z	¹ùÛ­ñ´
+#FOLLOWS!#paike_2s2so2tchk	°²ÈğÌğ
+#FOLLOWS!#paike_tzsyfjhio6	ÇØÃã½ĞÈ½È½
+#FOLLOWS!#paike_22go59ey8g	ÕÅÒÑ¹ğ
+#FOLLOWS!#wxsso_wyl0v389py	ÌÇÌÇ¼ªÏé
+#FOLLOWS!#qqsso_0uj8ix36ae	º«¹úÅ®Ö÷²¥
+qqsso_747ijmht84	Ñ©Ç§ç÷
+paike_3vb4g133io	#Reposter/ºÃÅ®º¢Ò²Á÷Ã¥
+paike_2xuf7ual4o	Éî¾®±ùËÎ±ù±ù
+mob_62161409	ÌÇÌÇ¼ªÏé
+</pre>
+
+</body>
+
+</html>
+

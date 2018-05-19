@@ -15,6 +15,7 @@
 // @include		http://*hhhggg.info/*
 // @include		http://club.yule.sohu.com/*
 // @include		http://pornothon.net/*
+// @include		http://www.ssios.com/*
 // @include		*/html/*/
 // @include		
 // @exclude			*google.*
@@ -377,6 +378,14 @@ var XRZPanel = $myPlace.panel;
 
 	function createPanel() {
 		var nvPanel = document.createElement("div");
+		/*nvPanel.setAttribute('style','padding: 4px;margin: 0px;z-index: 100000027;top: 30px;'
+				+'right: 0px;width: auto;position: absolute;text-align: right;'
+				+'font: 13px helvetica,arial,clean,sans-serif;display: block;'
+				+'border: 1px solid #000;background-color: #FEFEFE;color: #010101;'
+				+'opacity: 0.6;'
+				+''
+		);
+		*/
 		nvPanel.id=id_panel;
 		nvPanel.style.width = "100%";
 		nvPanel.style.overFlow = "auto";
@@ -387,8 +396,11 @@ var XRZPanel = $myPlace.panel;
 		nvPanel.style.top="40px";
 		nvPanel.style.left="0px;";
 		nvPanel.style.position="absolute"; 
-		nvPanel.style.zIndex="0";
+		nvPanel.style.zIndex="32788";
 		nvPanel.style.textAlign="left";
+		
+		
+		
 	/*
 		with (nvPanel.style) {
 			textAlign="center";margin="0px";padding="0px";
