@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name           myplace.navigator
 // @namespace      eotect@myplace
 // @description    $myPlace.navigator

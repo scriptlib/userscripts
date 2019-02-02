@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name           myplace.utils.prevnext
 // @namespace      eotect@myplace
 // @description    previous and next page
@@ -26,8 +26,8 @@ var prevtext="Previous";
 var nexttext="Next";
 var prevexp=/(goto-previous|nextnewset|goto=previous)$/i;
 var nextexp=/(goto-next|nextoldset|goto=next)$/i;
-var prevpage=/^(%3C|&lt;|<)?(%u4E0A%u4E00%u9801|%u4E0A%u4E00%u4E3B%u9898|%u4E0A%u4E00%u9875|%u4E0A%u9875|%u524D%u9875|%u524D%u3078|previous|prev|Newer)$/i;
-var nextpage=/^(%u4E0B%u4E00%u9801|%u4E0B%u4E00%u4E3B%u9898|%u4E0B%u4E00%u9875|%u4E0B%u9875|%u6B21%u3078|next|Older)(&gt;|>|%3E)?$/i;
+var prevpage=/^(%3C|&lt;|<|«|%AB)?(%u4E0A%u4E00%u9801|%u4E0A%u4E00%u4E3B%u9898|%u4E0A%u4E00%u9875|%u4E0A%u9875|%u524D%u9875|%u524D%u3078|previous|prev|Newer)$/i;
+var nextpage=/^(%u4E0B%u4E00%u9801|%u4E0B%u4E00%u4E3B%u9898|%u4E0B%u4E00%u9875|%u4E0B%u9875|%u6B21%u3078|next|Older)(&gt;|>|%3E|»|%BB)?$/i;
 var separatetext="&nbsp;&nbsp; &nbsp; &nbsp;";
 var prevlink=null;
 var nextlink=null;
@@ -36,6 +36,8 @@ for (var i=0;i<links.length;++i) {
     if (prevlink && nextlink) break;
     curhref=links[i].href;
     curtext=escape(links[i].text);
+	curtext = curtext.replace("%20","","g");
+	curtext = curtext.replace(/[\r\n\s]+/,"","g");
     if (!prevlink) {
         if (curhref.match(prevexp) || curtext.match(prevpage)) { 
             prevlink = links[i].cloneNode(true);
@@ -50,10 +52,24 @@ for (var i=0;i<links.length;++i) {
     }
 }
 if (! (prevlink || nextlink)) {
-    //XRZPanel.delete();
-    return;
+	var href = document.location.href;
+	var m = href.match(/([\?&]page=)(\d+)/);
+	if(m && m[1]) {
+		var key = m[1];
+		var p = new Number(m[2]);
+		if(p>1) {
+			var n = new Number(p-1);
+			prevlink = document.createElement('a');
+			prevlink.setAttribute('href',href.replace(/([\?&]page=)(\d+)/,"$1" +n));
+			prevlink.outterHTML = "&lt;&lt;第"+n+"页";
+		}
+		var n = new Number(p+1);
+		nextlink = document.createElement('a');
+		nextlink.setAttribute('href',href.replace(/([\?&]page=)(\d+)/,"$1" +n));
+		nextlink.outterHTML = "第"+n+"页&gt;&gt;";	
+	}
 }
-
+if(!(prevlink || nextlink)) return;
 
 var separate=document.createElement("span");
 separate.innerHTML=separatetext;
@@ -64,8 +80,8 @@ if (prevlink) {
     prevlink.title="Press Ctrl + <-";
     prevlink.style.textDecoration="underline";
     prevlink.id="bbs_prev";
-    XRZPanel.addSpace();
     XRZPanel.add(prevlink);
+	XRZPanel.addSpace();
 }
 if (nextlink) {
     nextlink.innerHTML=nexttext;
@@ -73,8 +89,8 @@ if (nextlink) {
     nextlink.style.color="blue";
     nextlink.style.textDecoration="underline";
     nextlink.id="bbs_next";
-    XRZPanel.addSpace();
     XRZPanel.add(nextlink);
+	XRZPanel.addSpace();
 }
 XRZPanel.show();
 

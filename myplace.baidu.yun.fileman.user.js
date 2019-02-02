@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.baidu.yun.fileman
 // @namespace   eotect@myplace
 // @description 百度网盘文件管理
@@ -45,7 +45,7 @@ unsafeWindow.$myPlace = $myPlace;
 			return require("disk-system:widget/pageModule/list/listInit.js");
 		},
 		move: function(list,dest,callback) {
-			yun.fileMoveCopyManager = yun.fileMoveCopyManager || require('disk-system:widget/system/fileService/fileMoveCopy/fileMoveCopy.js');
+			yun.fileMoveCopyManager = yun.fileMoveCopyManager || require('disk-system:widget/system/fileService/fileMoveCopy/fileMoveCopy.js').getInstance();
 			return yun.fileMoveCopyManager.moveTo(
 						list,
 						dest,
@@ -53,9 +53,9 @@ unsafeWindow.$myPlace = $myPlace;
 			);
 		},
 		batch_move:	function(list,pos,end,dest,func) {
-			var progress = '[' + pos + '/' + end + ']';
+			var progress = '[' + (pos+1) + '/' + end + ']';
 			if(pos>=end) {
-				console.log(progress + " 移动任务完成");
+				console.log('[' + end + '/' + ']' + " 移动任务完成");
 				yun.message(_L('Finished moving $1 files',end),yun.MessageMode.MODE_SUCCESS);
 				return func(end);
 			}
@@ -67,15 +67,10 @@ unsafeWindow.$myPlace = $myPlace;
 			basename = basename.replace(/\.(?:torrent|TORRENT|MASKED|MASKED\(\d+\)|[uU][rR][Ii])$/,"","i");
 			file.dest = dest + "/" + basename;
 			console.log(progress + " Moving " + filename  + " => " + dest);
-			return yun.fileman.move(
-				[file],
-				file.dest,
-				function() {
-					setTimeout(function(){
-						yun.fileman.batch_move(list,pos+1,end,dest,func)
-					},2000);
-				}
-			);
+			setTimeout(function(){
+						yun.fileman.batch_move(list,pos+1,end,dest,func);
+			},2000);
+			return yun.fileman.move([file],file.dest);
 		},
 		rename : function(file,newname,callback){
 			return yun.API.fileManager.reName(file.path,callback,newname);
@@ -104,7 +99,7 @@ unsafeWindow.$myPlace = $myPlace;
 		rename : function(exp,rpl) {
 			var list = yun.fileman.get_file_selected();
 			var newlist = [];
-			for(var i=0;i<list.length-1;i++) {
+			for(var i=0;i<list.length;i++) {
 				var file = list[i];
 				var oldname = file.server_filename;
 				file.oldname = oldname;
@@ -140,6 +135,24 @@ unsafeWindow.$myPlace = $myPlace;
 				yun.fileman.move(list,dest,callback);
 			}
 		},
+		toggleLeft : function(){
+			var el = document.getElementById('layoutMain');
+			var al = document.getElementById('layoutAside');
+			var c = [];
+			if(el && al) {
+				var px = el.style.left;
+				var ax = al.style.width;
+				if(px && px == '10px') {
+					c = ['175px',1,'10px'];
+				}
+				else {
+					c = ['10px',10,'175px'];
+				}
+				el.style.left = c[0];
+				el.style.zIndex = c[1];
+				al.style.width = c[2];
+			}
+		},
 	};
 	
 	$myPlace.$(document).ready(function(){
@@ -147,7 +160,10 @@ unsafeWindow.$myPlace = $myPlace;
 			var text = btndef.label;
 			var title = btndef.title || text;
 			return $myPlace.$(
-			'<div class="g-button" title="' + title + '"><a href="javascript:;" class="g-button-right">' + 
+			'<div class="g-button" title="' + 
+			//'<div style="cursor: pointer;background: #3b8cff;border: 2px solid #3b8cff;	color: #f8fbff;	border-radius: 6px;"  title="' + 
+					title + '">' + 
+				'<a href="javascript:;" class="g-button-right">' + 
 				'<span class="btn-val">' + 	text + 	 '</span>' +
 			'</a></div>'
 			);
@@ -230,10 +246,24 @@ unsafeWindow.$myPlace = $myPlace;
 				dialog.show();
 			};
 		}
+		
+		
+		buttons.push({
+			label:	_L('LeftPanel'),
+			title:	_L('LeftPanel'),
+			click:	function(){
+				return yun.actions.toggleLeft();
+			},
+		});
+		
 		//pos = $myPlace.$('div#layoutMain')[0];pos = pos.firstChild;
-		pos = $myPlace.$('div#layoutMain a.g-button')[0];
-		var box = $myPlace.$('<div style="display:inline-block"></div>');
-		box.insertBefore(pos);
+		//pos = $myPlace.$('div#layoutMain a.g-button')[0];
+		//pos = $myPlace.$('div.OstAZW')[0];
+		//pos = document.getElementById('layoutMain').children[0].children[0];
+		//var box = $myPlace.$('<div style="display:inline-block"></div>');
+		//var box = document.createElement('div');
+		//box.setAttribute('style','display:block;padding: 10px 10px 4px 10px;border: 1px grey;border-bottom-style: solid;');
+		//pos.parentNode.insertBefore(box,pos);//box.insertBefore(pos);
 		// a.g-button')[0];//.parentNode;
 		for(var i=buttons.length-1;i>=0;i--) {
 			var b = btn(buttons[i]);
@@ -243,10 +273,13 @@ unsafeWindow.$myPlace = $myPlace;
 			else {
 				b.click(buttons[i].click);
 			}
-			box.append(b);
+			$myPlace.panel.add(b[0]);
+			//box.appendChild(b[0]);
 			//b.insertBefore(pos);
 			//pos = b[0];
 		}
+		yun.actions.toggleLeft();
+		$myPlace.panel.hide();
 	});
 	unsafeWindow.myDisk = disk;
 })($myPlace.baidu.yun);

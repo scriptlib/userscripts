@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.utils.showbookmark
 // @namespace   eotect@myplace
 // @description Bookmarks shower

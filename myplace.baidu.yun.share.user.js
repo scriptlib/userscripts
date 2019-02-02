@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.baidu.yun.share
 // @namespace   eotect@myplace
 // @description 百度云网盘分享转存

@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name           myplace.panel
 // @namespace      eotect@myplace
 // @description    $myPlace.panel
@@ -44,7 +44,7 @@ unsafeWindow.$myPlace = $myPlace;
 				+'right: 0px;width: auto;position: absolute;text-align: right;'
 				+'font: 13px helvetica,arial,clean,sans-serif;display: block;'
 				+'border: 1px solid #000;background-color: #FEFEFE;color: #010101;'
-				+'opacity: 0.6;'
+				+'opacity: 1.0;'
 				+'',
 		LINKBOX_STYLE:
 				'margin: 0px;padding: 2px;text-align: center; '

@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.baidu.yun.share.home
 // @namespace   eotect@myplace
 // @description myplace.baidu.yun.share.home

@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name           myplace.imagesalbum
 // @namespace      eotect@myplace
 // @description    Internet images miner and shower
@@ -114,8 +114,23 @@
 // @include	http://www.socialtopgirl.com/*
 // @include http://m.weibo.cn/*
 // @include https://m.weibo.cn/*
-// @version 1.190
+// @include http://www.arzon.jp/*
+// @include https://www.arzon.jp/*
+// @include http://gif-ero.com/*
+// @include https://gif-ero.com/*
+// @include http://erogif-ch.com/*
+// @include https://erogif-ch.com/*
+// @include http://www.kdw019.com/*
+// @include https://www.kdw019.com/*
+// @include https://rexxx.org/*
+// @include http://rexxx.org/*
+// @include https://rexxx.com/*
+// @include http://rexxx.com/*
+// @include http://www.8541.xyz/*
+// @version 1.200
 //Changelog
+//  2019-01-03 
+//		Add support for rexxx.com,rexxx.org
 //	2015-05-16
 //		Add support for miaopai.com,weishi.com
 //	2015-04-26
@@ -599,13 +614,7 @@
 		/livedoor\.com/
 	);
 
-	M.register(/photo\.weibo\.com/,
-		['img','src'],
-		'attr_replace',
-		[/(small|mw690)\/(.+)\.jpg$/,'large/$2.jpg'],
-		{dialog:true,no_cache_selector:true,loadmode:'Interative'}
-	);
-
+	
 	//http://ww3.sinaimg.cn/large/684e58a1tw1dgd30cyt75j.jpg
 	M.register(/t\.sina\.com\.cn|weitu\.sdodo\.com/,
 		['img','src'],
@@ -823,12 +832,6 @@
 		{dialog:true}
 	);
 
-	M.reg(/http:\/\/qing\.weibo\.com/,
-		['img','src'],
-		'attr_replace',
-		[/\/mw600\//,'/large/'],
-		{dialog:true}
-	);
 	M.reg(/ikeepu\.com/,
 		['img','src'],
 		'attr_replace',
@@ -1010,11 +1013,6 @@
 		null,
 		{dialog:true}
 	);
-	$R('arzon\\.jp\/itemlist',
-		['img','src'],
-		'attr_replace',
-		[/S\.jpg$/,"L.jpg"]
-	);
 	$R('sungirlbaby\\.com',
 		['a','href'],
 		'attr_match',
@@ -1178,33 +1176,82 @@
 		}
 	);
 	//@SITE: http://weibo.com
-	/*
-		M.register(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.com|weitu\.sdodo\.com/,
-		['img','src'],
-		'attr_replace',
-		[,'/large/$2.jpg'],
-		 {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+
+	M.addSite(/weibo\.cn\/api\/container|photo\.weibo\.com\/.*\/get_photos/,
+		function() {
+			var r = new Array();
+			var pre = document.getElementsByTagName('pre');
+			if(!pre) {
+				return;
+			}
+			pre = pre[0];
+			var data;
+			var json = JSON.parse(pre.innerHTML);
+			if(!json) return;
+			data = json.data;
+			if(!data) return;
+			if(data.cards) data = data.cards;
+			if(!data.length) {
+				data = [data];
+			}
+			for(var i=0;i<data.length;i++) {
+				var pics = data[i].pics || data[i].photos_list || data[i];
+				if(!pics) continue;
+				for(var j=0;j<pics.length;j++) {
+					var p = pics[j];
+					var src = (p.pic_host && p.pic_name) ? p.pic_host + '/large/' + p.pic_name : null;
+					src = src || p.pic_big || p.pic_ori || p.pic_middle || p.pic_small || p.pic;
+					if((!p.mblog) && p.target_id) {
+						p.mblog = {id:p.target_id,text:p.caption};
+					}
+					
+					if(src) {
+						r.push({
+							src:src,
+							thumb:p.pic_middle || p.thumbnail_pic || p.pic_small,
+							link:p.mblog ? 'https://m.weibo.cn/detail/' + p.mblog.id : src,
+							text:p.mblog ? p.mblog.text : src,
+						});
+					}
+				}
+			}
+			return r;
+		},
+		false
 	);
-	*/
+	
+	$R(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.(?:cn|com)|weitu\.sdodo\.com/,
+		['img','src'],
+		function(elm,src) {
+			if(src.match(/sinaimg\.cn\/(?:thumb|small|middle|wap360)[^\/]*\//)) {
+				src = src.replace(/\/(?:thumb|small|middle|wap360)[^\/]*\//,'/large/');
+				var thumb = src.replace(/\/large\//,'/bmiddle/');
+				return {src:src,thumb:thumb};
+			}
+		},null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'},
+	);
+	
+	
 	$R('video\.weibo\.com\/show\?',
 		['img','src'],
 		'attr_set',
 		null,
 		{no_cache_selector:true}
 	);
-	$R('weibo\.com\/p\/',
-		['div.WBA_content img','src'],
-		function(img,src) {
-			if(src) {
-				var thumb = src;
-				src = src.replace(/\/(?:bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg|png)$/,"/large/$1.$2");
-				thumb = src.replace(/\/large\//,'/bmiddle/');
-				return {src:src,thumb:thumb};
-			}
-		},
-		null,
-		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
-	);
+	// $R('weibo\.com\/p\/',
+		// ['div.WBA_content img','src'],
+		// function(img,src) {
+			// if(src) {
+				// var thumb = src;
+				// src = src.replace(/\/(?:bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg|png)$/,"/large/$1.$2");
+				// thumb = src.replace(/\/large\//,'/bmiddle/');
+				// return {src:src,thumb:thumb};
+			// }
+		// },
+		// null,
+		// {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
+	// );
 		
 	$R('weibo\.com',
 		['.WB_feed_type','mid'],
@@ -1269,6 +1316,19 @@
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	);
 
+	M.register(/photo\.weibo\.com/,
+		['img','src'],
+		'attr_replace',
+		[/(small|mw690)\/(.+)\.jpg$/,'large/$2.jpg'],
+		{dialog:true,no_cache_selector:true,loadmode:'Interative'}
+	);
+	M.reg(/http:\/\/qing\.weibo\.com/,
+		['img','src'],
+		'attr_replace',
+		[/\/mw600\//,'/large/'],
+		{dialog:true}
+	);
+	
 	$R('pp\.163\.com',
 		['.pic-area img.z-tag','data-lazyload-src'],
 		function(elm,src) {
@@ -1636,8 +1696,80 @@
 		'attr_replace',
 		[/pt\.jpg$/,'pl.jpg']
 	);
-
-
+	$R('arzon\.jp',
+		['img','src'],
+		function(img,src) {
+			if(src) {
+				if(DOCHREF.match(/\/item_/)) {
+					if(src.match(/L\.jpg$/)) {
+						return {src:src};
+					}
+					else if(src.match(/\/m_[^\/]+\.jpg$/)) {
+						src = src.replace(/\/m_([^\/]+)\.jpg$/,'/$1.jpg');
+						return {src:src};
+					}
+				}
+				else if(src.match(/[SML]\.jpg$/)) {
+						src = src.replace(/[SML]\.jpg$/,'L.jpg');
+						return {src:src};
+				}
+			}
+		}
+	);
+	$R('gif-ero\.com',
+		['a','href'],
+		function(a,href){
+			if(href && href.match(/\.gif$/,'ig')) {
+				return {src:href};
+			}
+		}
+	);
+	$R('erogif-ch\.com',
+		['a','href'],
+		function(a,href){
+			if(href && href.match(/\.gif$/,'ig')) {
+				return {src:href};
+			}
+		}
+	);
+	//蝌蚪窝_一个释放蝌蚪的网站<
+	$R('kdw019\.com',
+		['a','href'],
+		function(a,href) {
+			if(href && href.match(/get_file/)) {
+				var ns = href.match(/\/([^\/]+)\/[^\/]*$/);
+				return {src:href,href:href,text:DOCTITLE + "_" + ns[1]};
+			}
+		}
+	);
+	$R('rexxx\.(?:com|org)',
+		['a','href'],
+		function(a,href) {
+			if(!href) return;
+			var m = href.match(/gifs\/(\d+)$/);
+			var host = 'https://gifs.rexxx.com';
+			if(m && m[1]) {
+				var p = host + "/" + m[1];
+				var t = a.innerText;
+				return {
+					//src:p + ".webm",
+					href:href,
+					text:t,
+					src:host + "/t/" + m[1] + ".jpg",
+					desc:'Webm: <a href="' + p + '.webm">' + t + "_" + m[1] + '.webm' + '</a>' + '<br/>' +
+					     'GIF : <a href="' + p + '.gif">' + t + "_" + m[1] + '.gif' + '</a>',
+				};
+			}	
+		}
+	);
+	
+	$R('8541\.xyz',
+		['div.main img','src'],
+		function(elm,src) {
+			return {src:src,text:src,href:src};
+		},
+	);
+	
 	M.addImgSite(
 		/\/thumbs\//,
 		"/",false,

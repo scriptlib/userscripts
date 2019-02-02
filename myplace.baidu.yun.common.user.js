@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.baidu.yun.common
 // @namespace   eotect@myplace
 // @description $myPlace.baidu.yun.common
@@ -117,6 +117,7 @@ d.yun = {
 			'Input target destination:'	:'输入:目标文件夹',
 			'Finished renaming $1 files':'重命名了$1个文件',
 			'Finished moving $1 files':'移动了$1个文件',
+			'LeftPanel' : '侧边栏',
 		},
 
 		_L : function(text,arg1,arg2,arg3,arg4){

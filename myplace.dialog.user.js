@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.dialog
 // @namespace   eotect@myplace
 // @description myplace.dialog

@@ -2,8 +2,10 @@
 // @name           myplace.lib.datashower
 // @namespace      eotect@myplace
 // @description    myplace data shower library
-// @version		   1.21
+// @version		   1.22
 //Changelog
+//  2019-01-03 
+//		Adjust UI
 //	2014-05-03
 //		Copy codes from the old myplace.imagealbum
 // ==/UserScript==
@@ -324,9 +326,9 @@ if(!$myPlace.lib) {
 		
 		ITEMSTYLE = 'text-align:left;padding-bottom:40px;border:dashed 1px grey;display:block;';
 		ITEMTITLESTYLE = 'text-align:left;color:darkblue;padding-left:20px;font-weight:bold;';
-		ITEMINDEXSTYLE = 'font-size:30pt;';
+		ITEMINDEXSTYLE = 'font-size:20pt;';
 		ITEMDESCSTYLE = '';
-		ITEMIMAGESTYLE = '';
+		ITEMIMAGESTYLE = 'padding:20px';
 	
 		var itemElm = document.createElement('div');
 		itemElm.setAttribute('class','datashower_item');
@@ -355,15 +357,29 @@ if(!$myPlace.lib) {
 		
 		var title2 = document.createElement('span');
 		
-		var titleText = item.text ? item.text : '';
+		var titleText = (item.text || item.text || item.href || '');
 		if(item.href) {
-			title2.innerHTML = '<a href="' + item.href + '">' + titleText + '</a>';
+			title2.innerHTML = "&gt;&gt;&gt;" +  '<a href="' + item.href + '">' + titleText + '</a>';
 		}
 		else {
-			title2.innerHTML = titleText;
+			title2.innerHTML = "&gt;&gt;&gt;" + titleText;
 		}
 		itemTitle.appendChild(title2);
 		itemElm.appendChild(itemTitle);
+		
+		//Content
+		if(item.src) {
+			var itemImage = document.createElement("div");
+			itemImage.setAttribute('class','datashower_itemimage');
+			itemImage.setAttribute('style',ITEMIMAGESTYLE);
+			if(item.thumb) {
+				itemImage.innerHTML='<img onclick=\'var d=this.src;this.src=this.getAttribute("data-src");this.setAttribute("data-src",d)\' ' + IMAGEONLOAD +  'data-src="' + item.src + '" src="' + item.thumb + '"></img>' 
+			}
+			else {
+				itemImage.innerHTML='<img' + IMAGEONLOAD +  'src="' + item.src + '"></img>' 
+			}
+			itemElm.appendChild(itemImage);
+		}
 		
 		//Desc
 		if(item.desc) {
@@ -373,19 +389,7 @@ if(!$myPlace.lib) {
 			itemDesc.innerHTML = '<p><blockquote style="width:70%">' + item.desc + '</blockquote></p>';
 			itemElm.appendChild(itemDesc);
 		}
-		//Content
-		if(item.src) {
-			var itemImage = document.createElement("div");
-			itemImage.setAttribute('class','datashower_itemimage');
-			itemImage.setAttribute('style',ITEMIMAGESTYLE);
-			if(item.thumb) {
-				itemImage.innerHTML='<img onclick=\'this.src=this.getAttribute("data-src");\' ' + IMAGEONLOAD +  'data-src="' + item.src + '" src="' + item.thumb + '"></img>' 
-			}
-			else {
-				itemImage.innerHTML='<img' + IMAGEONLOAD +  'src="' + item.src + '"></img>' 
-			}
-			itemElm.appendChild(itemImage);
-		}
+		
 		contPanel.appendChild(itemElm);
 	}
 	function createIndexPanel(idxPage,count,nvPanel) {
@@ -525,7 +529,7 @@ if(!$myPlace.lib) {
 			nvPanel.setAttribute('style',
 				  'text-align:center;margin:0px;padding:4px;'
 				+ 'background-color:#F9FFE5;overflow:scroll;'
-				+ 'position:fixed;top:80px;left:2%;'
+				+ 'position:float;top:80px;left:2%;'
 				+ 'width:95%;height:600px;'
 				+ 'z-index:100000027;border:solid black 1px'
 			);
@@ -533,7 +537,7 @@ if(!$myPlace.lib) {
 			ctrlBar.setAttribute('style',
 				  'text-color:block;background-color:grey;'
 				+ 'margin:0px;padding:4px;'
-				+ 'position:fixed;top:60px;left:2%;'
+				+ 'position:float;top:60px;left:2%;'
 				+ 'width:95%;height:20px;'
 				+ 'z-index:100000027;border:solid black 1px'
 			);
@@ -781,8 +785,12 @@ if(!$myPlace.lib) {
 					appendIndexLink(i,i,my_control);
 				}
 			}
-		
-			XRZPanel.add(my_control,1);
+			
+			var sp = document.createElement('span');
+			sp.innerHTML = "&nbsp;&nbsp;";
+			my_control.appendChild(sp);
+			
+			XRZPanel.add(my_control);
 		   //     XRZPanel.addSpace();
 			XRZPanel.show();
 			//loadPage(1,true);

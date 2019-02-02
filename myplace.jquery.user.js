@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name           myplace.jquery
 // @namespace      eotect@myplace
 // @description    $myPlace.jQuery

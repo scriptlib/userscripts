@@ -1,4 +1,4 @@
-// ==UserScript==
+﻿// ==UserScript==
 // @name        myplace.relilnk
 // @namespace   eotect@myplace
 // @description myplace.relilnk
@@ -18,18 +18,18 @@
 // @include https://clickme.net/*
 // @include http://*.tumblr.com/*
 // @include https://*.tumblr.com/*
+// @include http://btdb.*
+// @include https://btdb.*
 // @version     1.1
 // @grant       none
 // ==/UserScript==
-if(typeof unsafeWindow == 'undefined') {
-	var unsafeWindow = window;
+if(!unsafeWindow) {
+	unsafeWindow = window;
 }
-if(typeof $myPlace == 'undefined') {
-	var $myPlace = unsafeWindow.$myPlace || {};
-}
-if(typeof $myPlace.relink == 'undefined') {
-	$myPlace.relink = {};
-}
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+unsafeWindow.$myPlace = $myPlace;
+$myPlace.relink = $myPlace.relink || {};
+
 (function(d){
 	var $ = $myPlace.jQuery;
 	var DOC = window.document;
@@ -165,6 +165,9 @@ if(typeof $myPlace.relink == 'undefined') {
 	);
 	A(/tumblr\.com/,
 		[/http:\/\/([^\.]+)\.tumblr.com/,'https://$1.tumblr.com']
+	);
+	A(/btdb\./,
+		[/sort%3D/,"sort="]
 	);
 	
 d.start = start;
