@@ -342,6 +342,9 @@ if(!$myPlace.lib) {
 				var r = this.start(this.MINER[i]);
 				if(r) {
 					data = data.concat(r);
+					if(this.MINER[i][4].stophere) {
+						break;
+					}
 				}
 			}
 			if(data.length < 1) {
@@ -349,13 +352,21 @@ if(!$myPlace.lib) {
 					var r = this.start(this.MINER_SECOND[i]);
 					if(r) {
 						data = data.concat(r);
+						if(this.MINER_SECOND[i][4].stophere) {
+							break;
+						}
 					}
 				}
 			}
 			if(data.length < 1) {
 				for(var i=0;i<this.MINER_DEFAULT.length;i++) {
 					var r = this.start(this.MINER_DEFAULT[i]);
-					if(r) data = data.concat(r);
+					if(r) {
+						data = data.concat(r);
+						if(this.MINER_DEFAULT[i][4].stophere) {
+							break;
+						}
+					}
 				}
 			}
 			if(data.length < 1) {

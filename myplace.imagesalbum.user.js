@@ -127,6 +127,12 @@
 // @include https://rexxx.com/*
 // @include http://rexxx.com/*
 // @include http://www.8541.xyz/*
+// @include http://www.forum.banzaj.pl/*
+// @include https://www.forum.banzaj.pl/*
+// @include http://tuccom.com/*
+// @include https://tuccom.com/*
+// @include http://porn-image-xxx.com/*
+// @include https://porn-image-xxx.com/*
 // @version 1.200
 //Changelog
 //  2019-01-03 
@@ -579,11 +585,11 @@
 	M.reg(/http:\/\/blog\.sina\.com\.cn/,
 		['img','real_src'],
 		'attr_replace',
-		[/\/(orignal|bmiddle|middle|large|orignal|small|mw690)\//,'/large/'],
+		[/\/(orignal|bmiddle|webp360|middle|large|orignal|small|mw690)\//,'/large/'],
 		{dialog:true}
 	);
 	M.addImgSite(
-		/\/(orignal|bmiddle|middle|large|orignal|small|mw690)\//,'/large/',false,
+		/\/(orignal|bmiddle|webp360|middle|large|orignal|small|mw690)\//,'/large/',false,
 		/photo.blog\.sina\.com\.cn/
 	);
 
@@ -619,7 +625,7 @@
 	M.register(/t\.sina\.com\.cn|weitu\.sdodo\.com/,
 		['img','src'],
 		'attr_replace',
-		[/\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/,'/large/$2.jpg'],
+		[/\/(bmiddle|webp360|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.jpg$/,'/large/$2.jpg'],
 		 {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	);
 
@@ -1196,11 +1202,17 @@
 			}
 			for(var i=0;i<data.length;i++) {
 				var pics = data[i].pics || data[i].photos_list || data[i];
+				var mblog = data[i].mblog;
+				if((!pics) && mblog)
+					pics = mblog.pics;
 				if(!pics) continue;
 				for(var j=0;j<pics.length;j++) {
 					var p = pics[j];
 					var src = (p.pic_host && p.pic_name) ? p.pic_host + '/large/' + p.pic_name : null;
 					src = src || p.pic_big || p.pic_ori || p.pic_middle || p.pic_small || p.pic;
+					if((!p.mblog) && mblog) {
+						p.mblog = mblog;
+					}
 					if((!p.mblog) && p.target_id) {
 						p.mblog = {id:p.target_id,text:p.caption};
 					}
@@ -1208,7 +1220,7 @@
 					if(src) {
 						r.push({
 							src:src,
-							thumb:p.pic_middle || p.thumbnail_pic || p.pic_small,
+							thumb:p.pic_middle || p.thumbnail_pic || p.pic_small || src.replace(/\/large\//,'/mw690/'),
 							link:p.mblog ? 'https://m.weibo.cn/detail/' + p.mblog.id : src,
 							text:p.mblog ? p.mblog.text : src,
 						});
@@ -1220,6 +1232,29 @@
 		false
 	);
 	
+	$M(/weibo.cn\/p\/index\?containerid/,
+		['.m-img-box img','src'],
+		function(img,thumb) {
+			var imgexp = /\/(bmiddle|webp360|thumbnail|thumb\d+|small|square|mw690|orj360)\/(.+)\.(gif|jpg)$/;
+			var src = thumb.replace(imgexp,'/large/$2.$3');
+			thumb = thumb.replace(imgexp,'/mw690/$2.$3');
+			return {src:src,thumb:thumb};
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative',stophere:true}	
+	);
+	$M(/:\/\/weibo\.com\/\d+\/[^\/]+\?/,
+		['.WB_detail .media_box img','src'],
+		function(img,thumb) {
+			var imgexp = /\/(bmiddle|webp360|thumbnail|thumb\d+|small|square|mw690|orj360)\/(.+)\.(gif|jpg)$/;
+			var src = thumb.replace(imgexp,'/large/$2.$3');
+			return {src:src,thumb:thumb};
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative',stophere:true}
+	);
+	
+
 	$R(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.(?:cn|com)|weitu\.sdodo\.com/,
 		['img','src'],
 		function(elm,src) {
@@ -1244,7 +1279,7 @@
 		// function(img,src) {
 			// if(src) {
 				// var thumb = src;
-				// src = src.replace(/\/(?:bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg|png)$/,"/large/$1.$2");
+				// src = src.replace(/\/(?:bmiddle|webp360|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg|png)$/,"/large/$1.$2");
 				// thumb = src.replace(/\/large\//,'/bmiddle/');
 				// return {src:src,thumb:thumb};
 			// }
@@ -1253,6 +1288,8 @@
 		// {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	// );
 		
+	
+	
 	$R('weibo\.com',
 		['.WB_feed_type','mid'],
 		function(list,mid){
@@ -1270,7 +1307,7 @@
 			
 			var imgelms = detail.find('ul.WB_media_a li img');
 			if(!imgelms.length) {
-				imgelms.detail.find('img');
+				imgelms = detail.find('img');
 			}
 			if(!imgelms.length) {
 				return;
@@ -1297,7 +1334,7 @@
 			title = DOCTITLE;
 			title = title.replace(/\|[^\|]+$/,'');
 			
-			var imgexp = /\/(bmiddle|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg)$/;
+			var imgexp = /\/(bmiddle|webp360|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg)$/;
 			var images = new Array();
 			for(var i=0;i<imgelms.length;i++) {
 				var src = imgelms[i].src;
@@ -1315,6 +1352,9 @@
 		null,
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	);
+
+
+		
 
 	M.register(/photo\.weibo\.com/,
 		['img','src'],
@@ -1776,7 +1816,30 @@
 		/socialtopgirl\.com/
 	);
 		
+	M.addImgSite(
+		/\/thumbs\/t_/,
+		"/",false,
+		/www.forum.banzaj.pl/
+	);
 	
+	$R('tuccom.com',
+		['a','href'],
+		function(elm,src) {
+			var m;
+			if(m = src.match(/\?h=(.+\.(?:gif|jpg|jpe|jpeg|png))$/)) {
+				return {src:decodeURIComponent(m[1])};
+			}
+		},
+		null,
+		{inline:true},
+	);
+	
+	$R('porn-image-xxx.com',
+		['amp-img','src'],
+		'attr_match',
+		[/^(.+\.(jpg|jpeg|gif|png))$/,1],
+		{dialog:true},
+	);
 	//****************************************************
 	//Weak Rules
 	//****************************************************

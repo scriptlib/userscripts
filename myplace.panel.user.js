@@ -165,12 +165,15 @@ unsafeWindow.$myPlace = $myPlace;
 			}
 			return null;
 		},
-		addLink	: function(url,text,space) {
+		newLink : function(url,text,space,br) {
 			var a = document.createElement('a');
 			a.href = url;
-			a.innerHTML = text;
+			a.innerHTML = br ? text + "</br>" : text;
 			a.setAttribute('style',this.CLICKABLE_STYLE);
-			this.add(a,space);
+			return a;
+		},
+		addLink	: function(url,text,space) {
+			this.add(this.newLink(url,text,space));
 		},
 		addText	:	function(text,space) {
 			return this.addAction(text,null,space);
