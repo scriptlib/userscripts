@@ -41,12 +41,16 @@ for (var i=0;i<links.length;++i) {
     if (!prevlink) {
         if (curhref.match(prevexp) || curtext.match(prevpage)) { 
             prevlink = links[i].cloneNode(true);
+			prevlink.setAttribute("class","");
+			prevlink.setAttribute("id","");
             continue;
             }
     }
     if (!nextlink) {
         if (curhref.match(nextexp) || curtext.match(nextpage)) {
             nextlink = links[i].cloneNode(true);
+			nextlink.setAttribute("class","");
+			nextlink.setAttribute("id","");
             continue;
             }
     }

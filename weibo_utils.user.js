@@ -4,6 +4,8 @@
 // @description utils for weibo.com
 // @include     http://weibo.com/*
 // @include     https://weibo.com/*
+// @include     http://www.weibo.com/*
+// @include     https://www.weibo.com/*
 // @include		http://*.sinaimg.cn/*
 // @include		https://*.sinaimg.cn/*
 // @include		http://m.weibo.cn/*
@@ -24,9 +26,8 @@ if(!unsafeWindow) {
 	unsafeWindow = window;
 }
 var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
-window.addEventListener('load',function(){
-(function(_) {
-	
+
+function weibo_utils_init(_) {
 	var oid;
 	var onick;
 	if(unsafeWindow.$CONFIG) {
@@ -51,9 +52,13 @@ window.addEventListener('load',function(){
 			}
 		}
 	}
-	
+	if(!onick) {
+		var t = $myPlace.$("span.txt-shadow");
+		if(t) onick = t.text();
+	}
 	
 	if(_.panel && oid) {
+		
 		/*
 		if(!onick) {
 			var h3 = document.getElementsByTagName('h3');
@@ -63,7 +68,12 @@ window.addEventListener('load',function(){
 			}
 		}
 		*/
-		var element = document.createElement('div');
+		var element = document.getElementById('weibo_utils_panel');
+		if(element) {
+			element.parentNode.removeChild(element);
+		}
+		element = document.createElement('div');
+		element.setAttribute('id',"weibo_utils_panel");
 		element.appendChild(_.panel.newLink('https://weibo.com/u/' + oid, (onick || '主页'),0,1));
 		element.appendChild(_.panel.newLink('https://m.weibo.cn/profile/'+oid,(onick || '主页') + "[简版]",0,1));
 		var photos = [
@@ -108,4 +118,9 @@ window.addEventListener('load',function(){
 		_.panel.addLink(href.replace(/([\?&]page=)(\d+)/,"$1" +n),"第" + n + "页",1); 
 	}
 */	
-})($myPlace);});
+}
+
+window.addEventListener('load',function(){weibo_utils_init($myPlace)});
+if($myPlace.panel) {
+	$myPlace.panel.addAction("Weibo",function(){weibo_utils_init($myPlace)});
+}
