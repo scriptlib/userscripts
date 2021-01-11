@@ -133,8 +133,12 @@
 // @include https://tuccom.com/*
 // @include http://porn-image-xxx.com/*
 // @include https://porn-image-xxx.com/*
-// @version 1.200
+// @include https://23maott.com/*
+// @version 1.201
+
 //Changelog
+//  2021-01-10
+//	Support 23maott.com
 //  2019-01-03 
 //		Add support for rexxx.com,rexxx.org
 //	2015-05-16
@@ -156,10 +160,12 @@
 // ==/UserScript==
 
 (function(){
+
         if(parent != window) {
 			return;
 		}
-	
+
+
 	if(!unsafeWindow) {
 		unsafeWindow = window;
 	}
@@ -1258,8 +1264,8 @@
 	$R(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.(?:cn|com)|weitu\.sdodo\.com/,
 		['img','src'],
 		function(elm,src) {
-			if(src.match(/sinaimg\.cn\/(?:thumb|small|middle|wap360)[^\/]*\//)) {
-				src = src.replace(/\/(?:thumb|small|middle|wap360)[^\/]*\//,'/large/');
+			if(src.match(/sinaimg\.cn\/(?:thumb|small|middle|wap360|orj360)[^\/]*\//)) {
+				src = src.replace(/\/(?:thumb|small|middle|wap360|orj360)[^\/]*\//,'/large/');
 				var thumb = src.replace(/\/large\//,'/bmiddle/');
 				return {src:src,thumb:thumb};
 			}
@@ -1529,7 +1535,7 @@
 		  ['body','id'],
 		  function() {
 			var results = [];		
-			for  each (var prop in [
+				for(var prop in [
 					'VideoListJson',
 					'VideoInfoList',
 					'VideoListplay',
@@ -1840,6 +1846,15 @@
 		[/^(.+\.(jpg|jpeg|gif|png))$/,1],
 		{dialog:true},
 	);
+  
+  	$R(
+    "23maott.com\/",
+    ['img','data-original'],
+    'attr_set',
+    null,
+    {dialog:true}
+  );
+  
 	//****************************************************
 	//Weak Rules
 	//****************************************************
