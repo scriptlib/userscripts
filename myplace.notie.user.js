@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           myplace.notie
 // @namespace      eotect@myplace
 // @description    $myPlace.notie

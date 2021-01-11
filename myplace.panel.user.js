@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           myplace.panel
 // @namespace      eotect@myplace
 // @description    $myPlace.panel

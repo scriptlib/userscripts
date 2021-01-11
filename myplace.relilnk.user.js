@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        myplace.relilnk
 // @namespace   eotect@myplace
 // @description myplace.relilnk
@@ -18,19 +18,26 @@
 // @include https://clickme.net/*
 // @include http://*.tumblr.com/*
 // @include https://*.tumblr.com/*
-// @include http://btdb.*
-// @include https://btdb.*
-// @version     1.1
+// @include https://skrbt*.xyz/*
+// @include http://skrbt*.xyz/*
+// @include http://hjd.sdy2048.net/*
+// @include https://hjd.sdy2048.net/*
+// @version     1.1.3
 // @grant       none
+// @run-at document-end
 // ==/UserScript==
-if(!unsafeWindow) {
-	unsafeWindow = window;
+if(typeof unsafeWindow == 'undefined') {
+	var unsafeWindow = window;
 }
-var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
-unsafeWindow.$myPlace = $myPlace;
-$myPlace.relink = $myPlace.relink || {};
-
-(function(d){
+if(typeof $myPlace == 'undefined') {
+	var $myPlace = unsafeWindow.$myPlace || {};
+}
+if(typeof $myPlace.relink == 'undefined') {
+	$myPlace.relink = {};
+}
+(function(){
+  //alert("hi");
+  var d = $myPlace.relink;
 	var $ = $myPlace.jQuery;
 	var DOC = window.document;
 	var HREF = DOC.location.href;
@@ -40,6 +47,7 @@ $myPlace.relink = $myPlace.relink || {};
 	d.elements = [];
 	
 	for(var i=0;i<LINKS.length;i++) {
+    console.log(LINKS[i].href);
 		d.elements.push(LINKS[i]);
 	}
 	for(var i=0;i<IMAGES.length;i++) {
@@ -82,9 +90,10 @@ $myPlace.relink = $myPlace.relink || {};
 	function A(target,relink) {
 		var def = {target:target};
 		def.name = target;
-		console.log('RELINK add definition for ' + def.name);
+		
 				
 		var tf = typeof(relink);
+    console.log('RELINK add definition for ' + def.name + ' ' + tf);
 		if(tf == 'function') {
 			def.relinks = function(links,doc) {
 				for(var i=0;i<links.length;i++) {
@@ -98,6 +107,8 @@ $myPlace.relink = $myPlace.relink || {};
 			def.relinks = function(links,doc) {
 				for(var i=0;i<links.length;i++) {
 					if(links[i].href) {
+            //console.log(links[i].href);
+            //console.log(relink[0]);
 						links[i].href = links[i].href.replace(relink[0],relink[1]);
 					}
 					else if(links[i].src) {
@@ -113,7 +124,7 @@ $myPlace.relink = $myPlace.relink || {};
 						links[i].href = links[i].href.replace(relink,'');
 					}					
 					else if(links[i].src) {
-						links[i].src = links[i].src.replace(relink[0],relink[1]);
+						links[i].src = links[i].src.replace(relink,'');
 					}
 				}
 			};
@@ -166,12 +177,16 @@ $myPlace.relink = $myPlace.relink || {};
 	A(/tumblr\.com/,
 		[/http:\/\/([^\.]+)\.tumblr.com/,'https://$1.tumblr.com']
 	);
-	A(/btdb\./,
+  A(/skrbt.*.xyz/,
+    [/^.*\/([ABCDEFabcdef0123456789]{40})$/,'magnet:?xt=urn:btih:$1']
+  );
+  A(/hjd.sdy2048.net/,
+    [/http:\/\/(www\.s?xotu\.xyz)/,'https://$1']
+   );
+  A(/btdb\./,
 		[/sort%3D/,"sort="]
 	);
-	
 d.start = start;
 d.A = A;	
-DOC.addEventListener('DOMContentLoaded',start);
-})($myPlace.relink);
-
+d.start();
+})();

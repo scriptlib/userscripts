@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           myplace.navigator
 // @namespace      eotect@myplace
 // @description    $myPlace.navigator
@@ -161,6 +161,7 @@ var XRZPanel = $myPlace.panel;
 		for(var i=0;i<arr.length;i++) {
 			var text = arr[i].textContent;
 			if(!text) continue;
+      if(text.length < 4) continue;
 			if(text.match(/^\s*[\d\.\:\/\\]*\s*$/)) continue;
 			nArr.push(arr[i]);
 		}

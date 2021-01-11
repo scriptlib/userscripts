@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           myplace.imagesalbum
 // @namespace      eotect@myplace
 // @description    Internet images miner and shower

@@ -12,7 +12,7 @@
 // @include		https://m.weibo.cn/*
 // @include 	http://photo.weibo.com/*
 // @include 	https://photo.weibo.com/*
-// @version     1
+// @version     1.1
 // @grant       none
 // ==/UserScript==
 
