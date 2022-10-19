@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name           myplace.utils.prevnext
 // @namespace      eotect@myplace
 // @description    previous and next page

@@ -22,9 +22,10 @@
 // @include http://skrbt*.xyz/*
 // @include http://hjd.sdy2048.net/*
 // @include https://hjd.sdy2048.net/*
+// @include http://www.yckceo.com/*
+// @run-at  document-end
 // @version     1.1.3
 // @grant       none
-// @run-at document-end
 // ==/UserScript==
 if(typeof unsafeWindow == 'undefined') {
 	var unsafeWindow = window;
@@ -43,9 +44,9 @@ if(typeof $myPlace.relink == 'undefined') {
 	var HREF = DOC.location.href;
 	var LINKS = document.getElementsByTagName('a');
 	var IMAGES = document.getElementsByTagName('img');
-	
+
 	d.elements = [];
-	
+
 	for(var i=0;i<LINKS.length;i++) {
     console.log(LINKS[i].href);
 		d.elements.push(LINKS[i]);
@@ -53,9 +54,9 @@ if(typeof $myPlace.relink == 'undefined') {
 	for(var i=0;i<IMAGES.length;i++) {
 		d.elements.push(IMAGES[i]);
 	}
-	
+
 	d.sites = [];
-	
+
 	function start() {
 		console.log('RELINK for ' + HREF);
 		for(var i=0;i<d.sites.length;i++) {
@@ -90,18 +91,12 @@ if(typeof $myPlace.relink == 'undefined') {
 	function A(target,relink) {
 		var def = {target:target};
 		def.name = target;
-		
-				
+
+
 		var tf = typeof(relink);
     console.log('RELINK add definition for ' + def.name + ' ' + tf);
 		if(tf == 'function') {
-			def.relinks = function(links,doc) {
-				for(var i=0;i<links.length;i++) {
-					if(relink(links[i],doc)) {
-						break;
-					}
-				}
-			};
+			def.relinks = relink;
 		}
 		else if(tf == 'object' && relink.length) {
 			def.relinks = function(links,doc) {
@@ -122,7 +117,7 @@ if(typeof $myPlace.relink == 'undefined') {
 				for(var i=0;i<links.length;i++) {
 					if(links[i].href) {
 						links[i].href = links[i].href.replace(relink,'');
-					}					
+					}
 					else if(links[i].src) {
 						links[i].src = links[i].src.replace(relink,'');
 					}
@@ -131,10 +126,10 @@ if(typeof $myPlace.relink == 'undefined') {
 		}
 		d.sites.push(def);
 	}
-	
-	d.sites.push({		
+
+	d.sites.push({
 		target:	'7958.com',
-		relink:	function(doc,links){				
+		relink:	function(doc,links){
 			for(var i=0;i<links.length;i++) {
 				if(links[i].href && links[i].href.match(/\d+\.html$/)) {
 					links[i].href = links[i].href.replace(/download_(\d+\.html)$/,'index/downfile/$1');
@@ -146,22 +141,25 @@ if(typeof $myPlace.relink == 'undefined') {
 			if(btn.length) {
 				btn.html($(unsafeWindow.downurl));
 			}
-		},
+		}
 	});
 
 	A(/torrentproject\.com/,
 		[/google\.com\/search\?/,'google.com/search?safe=off&']
 	);
 	A(/(?:kaisou\.cc|bt\.com)\/Item/,
-		function(link,doc){
-			var title = document.title.replace(/(?:BT下载|高清BT).*$/,'');
-			if(link.href && link.href.match(/BTDown\//)) {
-				link.href = link.href.replace(/BTDown\//,'Torrent/');
-				link.setAttribute('title',title);
-			}
+		function(doc,links){
+      var title = document.title.replace(/(?:BT下载|高清BT).*$/,'');
+      for(var i=0;i<links.lenght;i++) {
+        var link = links[i];
+			  if(link.href && link.href.match(/BTDown\//)) {
+				  link.href = link.href.replace(/BTDown\//,'Torrent/');
+				  link.setAttribute('title',title);
+			  }
+      }
 		}
 	);
-	
+
 	A(/weipai\.cn/,
 		[/\/user\/([^\/]+)\/?$/,'/videos/$1']
 	);
@@ -186,7 +184,24 @@ if(typeof $myPlace.relink == 'undefined') {
   A(/btdb\./,
 		[/sort%3D/,"sort="]
 	);
+  A(/(?:\/yiciyuan\/tuyuan\/|\/yuedu\/shuyuan\//,
+    function(doc,links) {
+      var pelm = $('p');
+      for(var i=0;i<pelm.length;i++) {
+        var elm = pelm[i];
+        var text = elm.innerText;
+        if(text && text.match(/^(?:网站地址: |\s+)\s*https?:\/\//)) {
+          var href = text.replace(/^(?:网站地址: |\s+)\s*/,"");
+          elm.innerHTML =  elm.innerHTML + "<a target=\"_blank\" href=\"" + href + "\">　→ </a>";
+          //console.log(elm.innerHTML);
+        }
+      }
+    }
+  );
 d.start = start;
-d.A = A;	
+d.A = A;
 d.start();
+if($myPlace.panel) {
+  $myPlace.panel.addAction("RELINK",start)
+}
 })();
