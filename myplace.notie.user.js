@@ -2,13 +2,10 @@
 // @name           myplace.notie
 // @namespace      eotect@myplace
 // @description    $myPlace.notie
-// @version		   1.0
+// @version		   1.1
 // @include        *
-// @require			https://raw.githubusercontent.com/jaredreich/notie.js/master/notie.js
+// @require			https://unpkg.com/notie
 // @grant none
-// Changes log
-//	2013-09-29
-//		Remove @grant none, Run in sandbox.		
 // ==/UserScript==
 
 if(!unsafeWindow) {
