@@ -1,9 +1,11 @@
 // ==UserScript==
-// @name              短视频下载助手，为抖音、快手、小红书等提供无水印高清下载功能
-// @namespace         huahuacat_nowater_downloader
-// @version           1.0.3
-// @description       视频下载助手：1、支持抖音短视频下载：为首页、搜索结果、用户主页等提供无水印视频下载功能；2、快手短视频下载：为视频详情页提供无水印视频下载功能；其他平台持续开发中【脚本长期维护更新，完全免费，无广告】
-// @author            爱画画的猫,潮玩天下
+// @name	myplace.douyin
+// @namespace	myplace
+// @description		video download helper for douyin.com and kuaishou.com
+// @version           1.0.1
+// @original-author   爱画画的猫,潮玩天下
+// @original-license  AGPL License
+// @original-script   https://greasyfork.org/zh-CN/scripts/452660
 // @include           https://www.douyin.com/*
 // @include           https://www.kuaishou.com/*
 // @connect           www.iesdouyin.com
@@ -14,14 +16,11 @@
 // @grant             GM.xmlHttpRequest
 // @license           AGPL License
 // @charset		      UTF-8
-// @original-author   爱画画的猫
-// @original-license  AGPL License
-// @original-script   https://greasyfork.org/zh-CN/scripts/418804
 // @run-at            document-idle
 // ==/UserScript==
 
 (function () {
-	
+
 	/**
 	 * 此工具方法来自画画的猫
 	 * 脚本地址:https://greasyfork.org/zh-CN/scripts/418804
@@ -58,6 +57,27 @@
 			doc.appendChild(myStyle);
 		};
 		this.GMopenInTab = function(url, options={"active":true, "insert":true, "setParent":true}){
+      var title = options.title;
+      if(!title) {
+        var metas = document.getElementsByTagName('meta');
+        for(var i=0;i<metas.length;i++) {
+          var meta = metas[i];
+          if(meta.name == "description") {
+            title = meta.content;
+            title = title.replace(/^(.*)\s+-\s+(.+?)于(.+?)发布在抖音.*/,'$2_$3_$1');
+            break;
+          }
+        }
+      }
+      if(!title) {
+        title = document.title;
+      }
+      return this.webToast({
+        message:'<div><p>下载链接:</br></p><p><a style="text-decoration:underline;color:blue" href="' + url + '">' + title + '</a></p></div>',
+        time:5000,
+        html:1,
+        position:'center-top',
+      });
 			if (typeof GM_openInTab === "function") {
 				GM_openInTab(url, options);
 			} else {
@@ -92,7 +112,7 @@
 			})
 		};
 		this.addCommonHtmlCss = function(){
-			var cssText = 
+			var cssText =
 				`
 				@keyframes fadeIn {
 				    0%    {opacity: 0}
@@ -166,11 +186,11 @@
 		    var color = params.color;
 		    var position = params.position;  //center-top, center-bottom
 		    var defaultMarginValue = 50;
-		    
+
 		    if(time == undefined || time == ''){
 		        time = 1500;
 		    }
-		    
+
 		    var el = document.createElement("div");
 		    el.setAttribute("class", "web-toast-kkli9");
 		    el.innerHTML = params.message;
@@ -182,20 +202,20 @@
 		    if(color!=undefined && color!=''){
 		    	el.style.color=color;
 		    }
-		    
+
 		    //显示位置
 		    if(position==undefined || position==''){
 		    	position = "center-bottom";
 		    }
-		    
+
 		    //设置显示位置，当前有种两种形式
 		    if(position==="center-bottom"){
-		    	el.style.bottom = defaultMarginValue+"px"; 
+		    	el.style.bottom = defaultMarginValue+"px";
 		    }else{
-		    	el.style.top = defaultMarginValue+"px"; 
+		    	el.style.top = defaultMarginValue+"px";
 		    }
 			el.style.zIndex=999999;
-		    
+
 		    document.body.appendChild(el);
 		    el.classList.add("fadeIn");
 		    setTimeout(function () {
@@ -253,7 +273,7 @@
 			    return 'other';
 			}
 		};
-		this.RPCDownloadFile = function(fileName, url, savePath="D:/", RPCURL="ws://localhost:16800/jsonrpc", RPCToken="") {		
+		this.RPCDownloadFile = function(fileName, url, savePath="D:/", RPCURL="ws://localhost:16800/jsonrpc", RPCToken="") {
 			const self = this;
 			if(!savePath){
 				savePath = "D:/";
@@ -321,11 +341,11 @@
 			});
 		};
 	}
-	
+
 	//统一工具
 	const commonFunctionObject = new commonFunction();
 	commonFunctionObject.addCommonHtmlCss();	//统一html、css元素添加
-	
+
 	/**
 	 * 短视频去水印下载，与爱画画的猫共同开发维护
 	 * https://greasyfork.org/zh-CN/scripts/418804
@@ -373,7 +393,7 @@
 					async function downloader(){
 						try{
 							//延迟加载等到是否完成
-							let videoContainer = await commonFunctionObject.getElementObject(".xg-video-container");
+							let videoContainer = await commonFunctionObject.getElementObject(".xgplayer-controls");
 							if(!videoContainer){
 								return false;
 							}
@@ -384,7 +404,7 @@
 							if(douyinVideoDownloaderDom){
 								douyinVideoDownloaderDom.parentNode.parentNode.removeChild(douyinVideoDownloaderDom.parentNode);
 							}
-							
+
 							// 拷贝一个节点
 							let playbackSetting = bottomMenu.querySelector('.xgplayer-playback-setting');
 							if(!playbackSetting){
@@ -395,17 +415,42 @@
 							downloadText.innerText='下载';
 							downloadText.style = 'font-size:14px';
 							downloadText.setAttribute('id','douyin-video-downloder');
-							
+
 							let autoplaySetting = document.querySelector('.xgplayer-autoplay-setting');
 							if(!autoplaySetting){
 								return false;
 							}
 							autoplaySetting.after(download);
 							let videoPlayers = document.querySelectorAll('video');
-							let videoPlayDom = videoPlayers[videoPlayers.length>1 ? videoPlayers.length-2 : videoPlayers.length-1];		
+              let videoIndex = videoPlayers.length>1 ? videoPlayers.length-2 : videoPlayers.length-1
+              let videoTitle;
+              let name = document.querySelectorAll('.account-name');
+              if(name.length>0) {
+                  name = name[videoIndex].textContent;
+                  name = name.substr(1);
+                  videoTitle = name;
+              }
+              let title = document.querySelectorAll('.title');
+              if(title.length>0) {
+                title = title[videoIndex].textContent;
+                title = title.replace(/^展开/,"");
+                if(title.length>0) {
+                  videoTitle = videoTitle ? videoTitle + "_" + title : title;
+                }
+              }
+              let id = document.querySelectorAll('.xgplayer-detail-entry a.content-wrapper');
+              if(id.length) {
+                id = id[videoIndex].href;
+                id = id.match(/\/video\/(\d+)/);
+                if(id) {
+                   id = id[1];
+                   videoTitle = videoTitle ? videoTitle + "_" + id : id;
+                }
+              }
+							let videoPlayDom = videoPlayers[videoIndex];
 							document.querySelector("#douyin-video-downloder").addEventListener("click", (e)=>{
 								let playerUrl = videoPlayDom.children[0].src;
-								commonFunctionObject.GMopenInTab(playerUrl);
+								commonFunctionObject.GMopenInTab(playerUrl,{'title':videoTitle});
 							});
 						}catch(e){}
 					}
@@ -447,14 +492,14 @@
 						downloadDIV.innerText = "下载";
 						downloadDIV.setAttribute('id','kuaishou-video-downloder');
 						document.body.appendChild(downloadDIV);
-						
+
 						downloadDIV.addEventListener("click", function(e){
 							let videoDom = document.querySelector('.player-video');
 							if(!videoDom){
 								console.log('没有找到DOM');
 								return;
 							}
-							let videoSrc = videoDom.getAttribute('src');					
+							let videoSrc = videoDom.getAttribute('src');
 							if(videoSrc.match(/^blob/)){
 								console.log('blob视频无法下载');
 								return;
