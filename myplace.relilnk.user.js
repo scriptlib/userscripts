@@ -24,7 +24,7 @@
 // @include https://hjd.sdy2048.net/*
 // @include http://www.yckceo.com/*
 // @run-at  document-end
-// @version     1.1.3
+// @version     1.1.4
 // @grant       none
 // ==/UserScript==
 if(typeof unsafeWindow == 'undefined') {
@@ -37,7 +37,7 @@ if(typeof $myPlace.relink == 'undefined') {
 	$myPlace.relink = {};
 }
 (function(){
-  //alert("hi");
+
   var d = $myPlace.relink;
 	var $ = $myPlace.jQuery;
 	var DOC = window.document;
@@ -184,15 +184,15 @@ if(typeof $myPlace.relink == 'undefined') {
   A(/btdb\./,
 		[/sort%3D/,"sort="]
 	);
-  A(/(?:\/yiciyuan\/tuyuan\/|\/yuedu\/shuyuan\//,
+  A(/(?:\/yiciyuan\/tuyuan\/|\/yuedu\/shuyuan\/)/,
     function(doc,links) {
       var pelm = $('p');
       for(var i=0;i<pelm.length;i++) {
         var elm = pelm[i];
         var text = elm.innerText;
-        if(text && text.match(/^(?:网站地址: |\s+)\s*https?:\/\//)) {
-          var href = text.replace(/^(?:网站地址: |\s+)\s*/,"");
-          elm.innerHTML =  elm.innerHTML + "<a target=\"_blank\" href=\"" + href + "\">　→ </a>";
+        if(text && text.match(/^(?:网站地址: |\s*)\s*https?:\/\//)) {
+          var href = text.replace(/^(?:网站地址: |\s*)\s*/,"");
+          elm.innerHTML =  elm.innerHTML + '<a target="_blank" href="' + href + "\">　→ </a>";
           //console.log(elm.innerHTML);
         }
       }
@@ -202,6 +202,6 @@ d.start = start;
 d.A = A;
 d.start();
 if($myPlace.panel) {
-  $myPlace.panel.addAction("RELINK",start)
+  $myPlace.panel.addAction("RELINK",start);
 }
 })();
