@@ -2,7 +2,7 @@
 // @name	myplace.douyin
 // @namespace	myplace
 // @description		video download helper for douyin.com and kuaishou.com
-// @version           1.0.1
+// @version           1.0.3
 // @original-author   爱画画的猫,潮玩天下
 // @original-license  AGPL License
 // @original-script   https://greasyfork.org/zh-CN/scripts/452660
@@ -14,12 +14,85 @@
 // @grant             GM.openInTab
 // @grant             GM_xmlhttpRequest
 // @grant             GM.xmlHttpRequest
+// @grant        GM_notification
+// @grant        GM_setClipboard
 // @license           AGPL License
 // @charset		      UTF-8
 // @run-at            document-idle
 // ==/UserScript==
 
-(function () {
+
+(function() {
+var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
+unsafeWindow.$myPlace = $myPlace;
+var XRZPanel = $myPlace.panel;
+if(!XRZPanel.init()) return false;
+    'use strict';
+
+    // 复制页面 HTML 的核心函数
+    function copyHTML(htmlContent) {
+        //const htmlContent = document.documentElement.outerHTML;
+        // 方法 1：使用现代的 copy() 函数（在控制台中可用，但可能受跨域限制，不一定在 GM 脚本中总是有效）
+        // 但在 GreaseMonkey/Tampermonkey 中通常可以工作
+        if (typeof copy === 'function') {
+            try {
+                copy(htmlContent);
+            } catch (e) {
+                fallbackCopy(htmlContent);
+                return;
+            }
+        } else {
+            // 方法 2：使用 GM_setClipboard（推荐，更可靠，需要 @grant GM_setClipboard）
+            fallbackCopy(htmlContent);
+            return;
+        }
+
+        // 提示用户
+        showNotification('✅ 已复制到剪贴板！');
+    }
+
+    // 备用复制方法：使用 GM_setClipboard（需要脚本声明 @grant GM_setClipboard）
+    function fallbackCopy(content) {
+        if (typeof GM_setClipboard === 'function') {
+            GM_setClipboard(content);
+            showNotification('✅ 已通过 GM_setClipboard 复制！');
+        } else {
+            // 终极备用：尝试使用传统的 execCommand（不推荐，可能失效）
+            try {
+                const textarea = document.createElement('textarea');
+                textarea.value = content;
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+                textarea.select();
+                const successful = document.execCommand('copy');
+                document.body.removeChild(textarea);
+                if (successful) {
+                    showNotification('✅ 已复制（通过 execCommand）');
+                } else {
+                    showNotification('❌ 复制失败，请手动复制');
+                }
+            } catch (e) {
+                showNotification('❌ 复制失败：' + e.message);
+            }
+        }
+    }
+
+    // 显示通知（使用 GM_notification 或 alert）
+    function showNotification(message) {
+        if (typeof GM_notification === 'function') {
+            GM_notification({
+                text: message,
+                title: 'Copy Page HTML',
+                timeout: 3000
+            });
+        } else {
+            // 如果没有 GM_notification，使用简单的 alert（不太优雅，但能用）
+            alert(message);
+        }
+    }
+
+
 
 	/**
 	 * 此工具方法来自画画的猫
@@ -355,7 +428,7 @@
 			if(window.location.host !== "www.douyin.com"){
 				return;
 			}
-			window.addEventListener('load',function(){
+			window.addEventListener('load',function(a,b,c,copyFlag){
 				//这是搜索界面
 				if(window.location.href.match(/https:\/\/www\.douyin\.com\/search\/.*?/)){
 					function downloader(){
@@ -390,7 +463,7 @@
 						downloader();
 					},500);
 				}else{
-					async function downloader(){
+					async function downloader(a,b,c,flagCopy){
 						try{
 							//延迟加载等到是否完成
 							let videoContainer = await commonFunctionObject.getElementObject(".xgplayer-controls");
@@ -421,38 +494,64 @@
 								return false;
 							}
 							autoplaySetting.after(download);
-							let videoPlayers = document.querySelectorAll('video');
-              let videoIndex = videoPlayers.length>1 ? videoPlayers.length-2 : videoPlayers.length-1
+              let playing = document.querySelector('.xgplayer-playing');
+              let video = playing.querySelector('video');
               let videoTitle;
-              let name = document.querySelectorAll('.account-name');
-              if(name.length>0) {
-                  name = name[videoIndex].textContent;
-                  name = name.substr(1);
-                  videoTitle = name;
+              let name = playing.querySelector('.account-name');
+              if(name) {
+                name = name.textContent;
+                name = name.substr(1);
+                videoTitle = name;
               }
-              let title = document.querySelectorAll('.title');
-              if(title.length>0) {
-                title = title[videoIndex].textContent;
-                title = title.replace(/^展开/,"");
+              let title = playing.querySelector('.time');
+              if(title) {
+				title = title.textContent;
+                title = title.replace(/^[^\d]+/,"");
+                title = title.replace(/\s+$/,"");
                 if(title.length>0) {
                   videoTitle = videoTitle ? videoTitle + "_" + title : title;
                 }
               }
-              let id = document.querySelectorAll('.xgplayer-detail-entry a.content-wrapper');
-              if(id.length) {
-                id = id[videoIndex].href;
+              title = playing.querySelector('.title');
+              if(title) {
+				title = title.textContent;
+                title = title.replace(/^展开/,"");
+                if(title.length>0) {
+                    videoTitle = videoTitle ? videoTitle + "_" + title : title;
+                }
+              }
+
+              let id = playing.querySelector('.xgplayer-detail-entry a.content-wrapper');
+              if(id) {
+                id = id.href;
                 id = id.match(/\/video\/(\d+)/);
                 if(id) {
                    id = id[1];
                    videoTitle = videoTitle ? videoTitle + "_" + id : id;
                 }
               }
-							let videoPlayDom = videoPlayers[videoIndex];
+              if(!videoTitle) {
+                var metas = document.getElementsByTagName('meta');
+                for(var i=0;i<metas.length;i++) {
+                  var meta = metas[i];
+                  if(meta.name == "description") {
+                    videoTitle = meta.content;
+                    videoTitle = videoTitle.replace(/^(.*)\s+-\s+(.+?)于(.+?)发布在抖音.*/,'$2_$3_$1');
+                    break;
+                  }
+                }
+              }
+              if(!videoTitle) {
+                videoTitle = document.title;
+              }
+              if(flagCopy) {
+                copyHTML(video.children[0].src + "    " + videoTitle)
+              }
 							document.querySelector("#douyin-video-downloder").addEventListener("click", (e)=>{
-								let playerUrl = videoPlayDom.children[0].src;
+								let playerUrl = video.children[0].src;
 								commonFunctionObject.GMopenInTab(playerUrl,{'title':videoTitle});
 							});
-						}catch(e){}
+						}catch(e){console.log(e)}
 					}
 					//监听鼠标
 					window.addEventListener("wheel",downloader);
@@ -473,11 +572,15 @@
 							}
 						}, 200);
 					}
+          XRZPanel.addAction('Copy Video Source',function(a,b,c){downloader(a,b,c,true)})
 					domNodeInserted();
 					downloader();
 					window.addEventListener("click",downloader);
+
 				}
+
 			});
+
 		};
 		this.kuaishouVideoDownloader = function(){
 			if(window.location.host !== "www.kuaishou.com"){
@@ -529,6 +632,7 @@
 		this.start = function(){
 			this.douyinVideoDownloader();
 			this.kuaishouVideoDownloader();
+
 		};
 	};
 	(new shortVideoDownloader()).start();

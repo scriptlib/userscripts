@@ -3,7 +3,7 @@
 // @namespace      eotect@myplace
 // @description    $myPlace.panel
 // @include        http*
-// @version        1.04
+// @version        1.05
 // @grant	none
 // ==/UserScript==
 
@@ -30,7 +30,7 @@ unsafeWindow.$myPlace = $myPlace;
 			return true;
 			*/
 		}
-		
+
 	var XRZPanel = {
 		TEXT_SHOW : '+',
 		TEXT_HIDE : '-',
@@ -39,16 +39,17 @@ unsafeWindow.$myPlace = $myPlace;
 		DOMBox : null,
 		DOMHolder : null,
 		DOMControl : null,
-		PANEL_STYLE	:	
-				'padding: 4px;margin: 0px;z-index: 100000027;top: 30px;'
-				+'right: 0px;width: auto;position: absolute;text-align: right;'
+		PANEL_STYLE	:
+				'padding: 2px;margin: 0px;z-index: 100000027;top: 30px;'
+				+'right: 30px;width: auto;position: absolute;text-align: center;'
 				+'font: 13px helvetica,arial,clean,sans-serif;display: block;'
-				+'border: 1px solid #000;background-color: #FEFEFE;color: #010101;'
-				+'opacity: 1.0;'
+				+'border: 1px solid #000;background-color: rgba(0,0,0,0.8);color: white;'
+				+'opacity: 1.0;min-width:fit-content;min-height:fit-content;'
 				+'',
+    TABLE_STYLE : 		'padding:0px;min-width:fit-content;min-height:fit-content;',
 		LINKBOX_STYLE:
 				'margin: 0px;padding: 2px;text-align: center; '
-				+'font: 13px helvetica,arial,clean,sans-serif;display: block;color: #030303;'
+				+'font: 13px helvetica,arial,clean,sans-serif;display: flex;gap:10px;color: white;'
 				+'',
 		CLICKABLE_STYLE:
 				'cursor:pointer;text-decoration:underline;',
@@ -70,7 +71,7 @@ unsafeWindow.$myPlace = $myPlace;
 			panelwidth="100%";
 			panelheight="40px";
 			var panel=document.createElement("table");
-			
+
 			panel.id=PANEL_ID;
 			panel.setAttribute('style',this.PANEL_STYLE);
 			var tr = document.createElement('tr');
@@ -87,10 +88,11 @@ unsafeWindow.$myPlace = $myPlace;
 						XRZPanel.delete();return 1;
 					},
 					false);
-			td.appendChild(control);   
+			td.appendChild(control);
 			tr.appendChild(td);
 			*/
 			var td = document.createElement('td');
+      td.setAttribute("style",this.TABLE_STYLE);
 			var control = document.createElement('span');
 			control.id = PANEL_CONTROL_ID;
 
@@ -101,23 +103,23 @@ unsafeWindow.$myPlace = $myPlace;
 					},
 					false);
 			td.appendChild(control);
-			
+
 			tr.appendChild(td);
-			
-			
+
+
 			var linkbox=document.createElement("td");
 			linkbox.id= PANEL_BOX_ID;
 			linkbox.setAttribute('style',this.LINKBOX_STYLE);
 			tr.appendChild(linkbox);
-			
-			
-			
+
+
+
 			panel.appendChild(tr);
-					
+
 			// var ss = document.createElement('style');
 			// ss.innerText = '.a {color:black;cursor:bean;    }';
 			// panel.appendChild(ss);
-			
+
 			//document.body.insertBefore(holder,document.body.firstChild);
 			document.body.insertBefore(panel,document.body.firstChild);
 			// debugPrint("Panel box created");
@@ -126,7 +128,7 @@ unsafeWindow.$myPlace = $myPlace;
 			this.DOMPanel = document.getElementById(PANEL_ID);
 			this.DOMBox = document.getElementById(PANEL_BOX_ID);
 			this.DOMControl = document.getElementById(PANEL_CONTROL_ID);
-			
+
 			return true;
 		},
 
@@ -139,6 +141,7 @@ unsafeWindow.$myPlace = $myPlace;
 			return null;
 		},
 		addSpace : function(count) {
+      return;
 			if(this.DOMBox) {
 				var separator = document.createElement("span");
 				var prepend;
@@ -151,7 +154,7 @@ unsafeWindow.$myPlace = $myPlace;
 					for(var i=0;i<count;i++) {
 						space = space + SEPARATOR_TEXT;
 					}
-					separator.innerHTML = space;				
+					separator.innerHTML = space;
 				}
 				else {
 					separator.innerHTML = SEPARATOR_TEXT;
@@ -172,6 +175,10 @@ unsafeWindow.$myPlace = $myPlace;
 			a.setAttribute('style',this.CLICKABLE_STYLE);
 			return a;
 		},
+    addNewLine : function() {
+      var a = document.createElement('br');
+      this.add(a);
+    },
 		addLink	: function(url,text,space) {
 			this.add(this.newLink(url,text,space));
 		},
@@ -183,7 +190,7 @@ unsafeWindow.$myPlace = $myPlace;
 			if(func) {
 				a.addEventListener('click',func);
 				a.setAttribute('style',this.CLICKABLE_STYLE);
-			}		
+			}
 			a.innerHTML = text;
 			this.add(a,space);
 		},
@@ -191,7 +198,7 @@ unsafeWindow.$myPlace = $myPlace;
 			var element = document.createElement('span');
 			element.innerHTML = state1.html;
 			element.setAttribute('style',this.CLICKABLE_STYLE);
-			
+
 			element.addEventListener('click',function(){
 				var test = cond();
 				if(test) {
@@ -212,13 +219,13 @@ unsafeWindow.$myPlace = $myPlace;
 			this.DOMControl.innerHTML = this.TEXT_SHOW;//'&lt;&lt;&lt;';
 		//    this.DomPanel.style.width='200px';
 		},
-		show : function() { 
-			this.DOMBox.style.display = "block";
+		show : function() {
+			this.DOMBox.style.display = "flex";
 			this.DOMControl.innerHTML = this.TEXT_HIDE;//'&gt;&gt;&gt;';
 			//this.DOMPanel.style.width='100%';
 		},
 		toggle : function() {
-			if(this.DOMBox.style.display == "none") 
+			if(this.DOMBox.style.display == "none")
 				this.show();
 			else
 				this.hide();

@@ -134,12 +134,13 @@
 // @include http://porn-image-xxx.com/*
 // @include https://porn-image-xxx.com/*
 // @include https://23maott.com/*
+// @include https://yiyan.baidu.com/*
 // @version 1.201
 
 //Changelog
 //  2021-01-10
 //	Support 23maott.com
-//  2019-01-03 
+//  2019-01-03
 //		Add support for rexxx.com,rexxx.org
 //	2015-05-16
 //		Add support for miaopai.com,weishi.com
@@ -158,6 +159,286 @@
 //		Add support for oisinbosoft.com
 //		Add support for arzon.jp
 // ==/UserScript==
+(function() {
+    'use strict';
+
+    class FloatBox {
+        constructor() {
+            this.container = null;
+            this.contentElement = null;
+            this.closeButton = null;
+            this.isOpen = false;
+            this.init();
+        }
+
+        /**
+         * Initialize the floatbox DOM elements
+         */
+        init() {
+            // Create container
+            this.container = document.createElement('div');
+            this.container.id = 'floatbox-container';
+            this.container.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.85);
+                z-index: 999999;
+                display: none;
+                justify-content: center;
+                align-items: center;
+                font-family: Arial, sans-serif;
+            `;
+
+            // Create content wrapper
+            const contentWrapper = document.createElement('div');
+            contentWrapper.style.cssText = `
+                background-color: #ffffff;
+                border-radius: 8px;
+                padding: 20px;
+                max-width: 80%;
+                max-height: 80%;
+                overflow: auto;
+                position: relative;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            `;
+
+            // Create close button
+            this.closeButton = document.createElement('button');
+            this.closeButton.innerHTML = '&times;';
+            this.closeButton.style.cssText = `
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: none;
+                border: none;
+                font-size: 28px;
+                cursor: pointer;
+                color: #333;
+                line-height: 1;
+                padding: 5px 10px;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+            `;
+            this.closeButton.onmouseover = () => {
+                this.closeButton.style.backgroundColor = '#f0f0f0';
+            };
+            this.closeButton.onmouseout = () => {
+                this.closeButton.style.backgroundColor = 'transparent';
+            };
+            this.closeButton.onclick = () => this.close();
+
+            // Create content element
+            this.contentElement = document.createElement('div');
+            this.contentElement.id = 'floatbox-content';
+            this.contentElement.style.cssText = `
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                line-height: 1.6;
+                color: #333;
+                font-size: 14px;
+                margin-top: 10px;
+                min-width: 300px;
+                min-height: 100px;
+            `;
+
+            // Assemble the structure
+            contentWrapper.appendChild(this.closeButton);
+            contentWrapper.appendChild(this.contentElement);
+            this.container.appendChild(contentWrapper);
+
+            // Add click outside to close
+            this.container.onclick = (e) => {
+                if (e.target === this.container) {
+                    this.close();
+                }
+            };
+
+            // Add keyboard support (ESC to close)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.isOpen) {
+                    this.close();
+                }
+            });
+
+            // Append to body
+            document.body.appendChild(this.container);
+        }
+
+        /**
+         * Open the floatbox
+         */
+        open() {
+            this.container.style.display = 'flex';
+            this.isOpen = true;
+            // Auto select all content after opening
+            setTimeout(() => {
+                this.selectAll();
+            }, 0);
+        }
+
+        /**
+         * Close the floatbox
+         */
+        close() {
+            this.container.style.display = 'none';
+            this.isOpen = false;
+        }
+
+        /**
+         * Set the text content of the floatbox
+         * @param {string} text - The text to display
+         */
+        setText(text) {
+            if (typeof text === 'string') {
+                this.contentElement.textContent = text;
+            } else {
+                console.warn('FloatBox: setText requires a string parameter');
+            }
+        }
+
+        /**
+         * Set hyperlinks in the floatbox, each line becomes a clickable link
+         * Accepts either an array of strings (URLs) or an array of objects
+         * For objects, tries url, src, href properties in order
+         * Link text is always the same as the URL
+         * @param {Array<string|{url?: string, src?: string, href?: string, target?: string}>} links - Array of link strings or objects
+         *
+         * @example
+         * // String array
+         * FloatBox.setLinks([
+         *     "https://www.google.com",
+         *     "https://github.com"
+         * ]);
+         *
+         * @example
+         * // Object array - tries url, src, href in order
+         * FloatBox.setLinks([
+         *     { url: "https://google.com" },
+         *     { src: "https://github.com" },
+         *     { href: "https://stackoverflow.com" }
+         * ]);
+         */
+        setLinks(links) {
+            if (!Array.isArray(links)) {
+                console.warn('FloatBox: setLinks requires an array parameter');
+                return;
+            }
+
+            // Clear existing content
+            this.contentElement.innerHTML = '';
+
+            // Create link elements
+            links.forEach((link, index) => {
+                let href, target;
+
+                // Handle string arrays
+                if (typeof link === 'string') {
+                    href = link;
+                    target = '_blank';
+                }
+                // Handle object arrays - try url, src, href in order
+                else if (typeof link === 'object' && link !== null) {
+                    href = link.url || link.src || link.href;
+
+                    if (!href) {
+                        console.warn(`FloatBox: Link at index ${index} has no url, src, or href property`);
+                        return;
+                    }
+
+                    target = link.target || '_blank';
+                } else {
+                    console.warn(`FloatBox: Invalid link at index ${index}`);
+                    return;
+                }
+
+                const linkElement = document.createElement('a');
+                linkElement.href = href;
+                linkElement.textContent = href; // Display text is the same as the URL
+                linkElement.target = target;
+                linkElement.style.cssText = `
+                    display: block;
+                    color: #0066cc;
+                    text-decoration: none;
+                    padding: 8px 12px;
+                    margin: 4px 0;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                    font-size: 14px;
+                    line-height: 1.6;
+                `;
+
+                // Hover effects
+                linkElement.onmouseover = () => {
+                    linkElement.style.backgroundColor = '#f0f7ff';
+                    linkElement.style.color = '#0052a3';
+                    linkElement.style.paddingLeft = '16px';
+                };
+                linkElement.onmouseout = () => {
+                    linkElement.style.backgroundColor = 'transparent';
+                    linkElement.style.color = '#0066cc';
+                    linkElement.style.paddingLeft = '12px';
+                };
+
+                this.contentElement.appendChild(linkElement);
+            });
+        }
+
+        /**
+         * Get the current text content
+         * @returns {string} The current text content
+         */
+        getText() {
+            return this.contentElement.textContent || '';
+        }
+
+        /**
+         * Select all content in the floatbox
+         * Works for both text content and links
+         */
+        selectAll() {
+            const selection = window.getSelection();
+            const range = document.createRange();
+
+            // Select all content in the content element
+            range.selectNodeContents(this.contentElement);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        /**
+         * Toggle the floatbox visibility
+         */
+        toggle() {
+            if (this.isOpen) {
+                this.close();
+            } else {
+                this.open();
+            }
+        }
+
+        /**
+         * Check if the floatbox is currently open
+         * @returns {boolean} True if open, false otherwise
+         */
+        isOpenState() {
+            return this.isOpen;
+        }
+    }
+
+    // Create global instance
+    window.FloatBox = new FloatBox();
+
+    // Export as module if available
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = FloatBox;
+    }
+})();
+
+
+
 
 (function(){
 
@@ -172,12 +453,12 @@
 	var $myPlace = $myPlace || unsafeWindow.$myPlace || {};
 	unsafeWindow.$myPlace = $myPlace;
 	var $ = $myPlace.jQuery || unsafeWindow.$;
-	
+
 	var DOCHREF = document.location.href;
 	var DOCTITLE = document.title;
 	var ELMLINKS = document.getElementsByTagName('a');
 	var ELMIMGS = document.getElementsByTagName('img');
-	
+
 	var M = new $myPlace.lib.dataminer(DOCHREF);
 	var $M = function(a1,a2,a3,a4,a5,a6,a7,a8,a9) {
 		return M.reg(a1,a2,a3,a4,a5,a6,a7,a8,a9);
@@ -186,8 +467,8 @@
 		a1 = new RegExp('https?:\\/\\/[^\\.\\/]*\\.?' + a1);
 		return M.reg(a1,a2,a3,a4,a5,a6,a7,a8,a9);
 	};
-	
-	
+
+
 	//REGISTER MINER
 	M.registerDefault(/0*[01].s?html?[^\/]*$/,
 		[document,''],
@@ -199,8 +480,8 @@
 			picIdx = match[1];
 			var baseImg;
 			for(var i=0;i<ELMIMGS.length;i++) {
-				if(ELMIMGS[i].src.match(new RegExp(picIdx + "\.jpg$","i")) || 
-					ELMIMGS[i].src.match(new RegExp((picIdx - 1) + "\.jpg$","i")) || 
+				if(ELMIMGS[i].src.match(new RegExp(picIdx + "\.jpg$","i")) ||
+					ELMIMGS[i].src.match(new RegExp((picIdx - 1) + "\.jpg$","i")) ||
 					ELMIMGS[i].src.match(new RegExp((picIdx + 1) + "\.jpg$","i"))) {
 					baseImg = ELMIMGS[i].src;
 					baseImg = baseImg.replace(/\d+\.jpg$/,"");
@@ -230,7 +511,7 @@
 				result.push({src:src,href:src,text:src});
 				src = baseImg + "00" + i + ".jpg";
 				result.push({src:src,href:src,text:src});
-				
+
 			}
 			for(var i=10;i<100 && i<count;i++) {
 				var src = baseImg + i + ".jpg";
@@ -242,7 +523,7 @@
 				var src = baseImg + i + ".jpg";
 				result.push({src:src,href:src,text:src});
 			}
-			return result;            
+			return result;
 		}
 	);
 
@@ -324,7 +605,7 @@
 			if(a) {
 				r.href = a.getAttribute('href');
 			}
-			return { 
+			return {
 				src:r.src,
 				href:r.href,
 				text:r.text
@@ -441,7 +722,7 @@
 	//onMouseMove="OpenDiv('?鹵',this,195,139,'http://t1.goojje.com/b2/f3/93/b2f32a93349c04a4027a7540da0b7813.jpg','<em>?鹵</em>???','350X250-61k','http://v.766.com/zy/201011/20101124_40360.html','http://v.766.com/system/uploadimg/video/201008/pocle_20100830115444_9187.jpg',true)"
 
 	M.addSite(/image\.goojje\.com/,
-		function() {    
+		function() {
 			var result = new Array();
 			var links = document.getElementsByTagName("img");
 			for (var i=0;i<links.length;i++) {
@@ -455,7 +736,7 @@
 						result.push(new_image_from(r[5],r[4],r[2],curlink,1));
 					}
 				}
-				
+
 			}
 			return result;
 		},
@@ -626,7 +907,7 @@
 		/livedoor\.com/
 	);
 
-	
+
 	//http://ww3.sinaimg.cn/large/684e58a1tw1dgd30cyt75j.jpg
 	M.register(/t\.sina\.com\.cn|weitu\.sdodo\.com/,
 		['img','src'],
@@ -679,7 +960,7 @@
 		[/^(.+\/([^\.\/]+\.(?:jpg|png|jpeg|gif)))$/,1,DOCHREF,document.title],
 		{inline:false,dialog:true}
 	);
-		
+
 	M.register(
 		/4gifs\.org/,
 		['img','src'],
@@ -939,12 +1220,12 @@
 				}
 			}
 			var links = elm.innerHTML.match(/_mark\('([^\']+)'/);
-			
-		
+
+
 			// alert(elm.innerHTML);
 			// alert(links);
 			// fail();
-		
+
 			if(links) {
 				var full = unescape(links[1]);
 				var m = full.match(/^(.+)(?:#|%23)photo-url:(.+)$/);
@@ -1084,7 +1365,7 @@
 		[/small\.jpg/,'\.jpg'],
 		{dialog:true}
 	);
-	
+
 	//@SITE http://www.flickr.com
 	function flickr_get_pic(ori,type) {
 		if(!type) type='b';
@@ -1135,7 +1416,7 @@
 				if(attr) {
 					attr = attr.replace(/(?:_z|_s|_q|_n|_c|_m|_b|)\.jpg$/,'_' + type + '.jpg');
 					return {src:attr};
-				}			
+				}
 				},
 				props: {dialog:true,loadmode:'Interative',no_cache_selector:true}
 		};
@@ -1222,7 +1503,7 @@
 					if((!p.mblog) && p.target_id) {
 						p.mblog = {id:p.target_id,text:p.caption};
 					}
-					
+
 					if(src) {
 						r.push({
 							src:src,
@@ -1237,7 +1518,7 @@
 		},
 		false
 	);
-	
+
 	$M(/weibo.cn\/p\/index\?containerid/,
 		['.m-img-box img','src'],
 		function(img,thumb) {
@@ -1247,7 +1528,7 @@
 			return {src:src,thumb:thumb};
 		},
 		null,
-		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative',stophere:true}	
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative',stophere:true}
 	);
 	$M(/:\/\/weibo\.com\/\d+\/[^\/]+\?/,
 		['.WB_detail .media_box img','src'],
@@ -1259,7 +1540,20 @@
 		null,
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative',stophere:true}
 	);
-	
+
+  	$M(/:\/\/yiyan.baidu.com\//,
+		['img','src'],
+		function(img,thumb) {
+      if(thumb.match(/resize/)) {
+			  var src = thumb.replace(/\.png.+$/,".png");
+			  return {src:src,thumb:thumb};
+      }
+      return;
+		},
+		null,
+		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative',stophere:true}
+	);
+
 
 	$R(/t\.sina\.com\.cn|(\/\/|www\.|m.)weibo\.(?:cn|com)|weitu\.sdodo\.com/,
 		['img','src'],
@@ -1272,8 +1566,8 @@
 		},null,
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'},
 	);
-	
-	
+
+
 	$R('video\.weibo\.com\/show\?',
 		['img','src'],
 		'attr_set',
@@ -1293,24 +1587,24 @@
 		// null,
 		// {dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	// );
-		
-	
-	
+
+
+
 	$R('weibo\.com',
 		['.WB_feed_type','mid'],
 		function(list,mid){
 			if(!mid) return;
-			
+
 			var $= $myPlace.jQuery;
-			
+
 			var detail = $(list).find('.WB_detail');
 			var text;
 			var href;
 			var title;
 			var images;
-			
+
 			if(!detail.length) return;
-			
+
 			var imgelms = detail.find('ul.WB_media_a li img');
 			if(!imgelms.length) {
 				imgelms = detail.find('img');
@@ -1318,7 +1612,7 @@
 			if(!imgelms.length) {
 				return;
 			}
-			
+
 			var jtext = detail.find('.WB_text');
 			if(jtext.length) {
 				text = jtext.text().replace(/^[　\s\n\r]+/,'');
@@ -1327,8 +1621,8 @@
 			else {
 				text = '';
 			}
-			
-			
+
+
 			var jlink = detail.find('.WB_from .S_txt2');
 			if(jlink.length) {
 				href = jlink[0].href;
@@ -1336,10 +1630,10 @@
 			else {
 				href = DOCHREF;
 			}
-			
+
 			title = DOCTITLE;
 			title = title.replace(/\|[^\|]+$/,'');
-			
+
 			var imgexp = /\/(bmiddle|webp360|thumbnail|thumb\d+|small|square|mw690)\/(.+)\.(gif|jpg)$/;
 			var images = new Array();
 			for(var i=0;i<imgelms.length;i++) {
@@ -1360,7 +1654,7 @@
 	);
 
 
-		
+
 
 	M.register(/photo\.weibo\.com/,
 		['img','src'],
@@ -1374,7 +1668,7 @@
 		[/\/mw600\//,'/large/'],
 		{dialog:true}
 	);
-	
+
 	$R('pp\.163\.com',
 		['.pic-area img.z-tag','data-lazyload-src'],
 		function(elm,src) {
@@ -1385,15 +1679,15 @@
 			return {text:document.title,src:src};
 		}
 	);
-	
+
 	$R('fengniao\.com\/active\/',
 		['.img5 img,dt img','src'],
 		'attr_replace',
 		[/_\d+\.jpg$/,'_600.jpg'],
 		{no_cache_selector:true,dialog:true,click:true}
 	);
-	
-	
+
+
 	$R('instagram\.com\/[^\/]+$',
 		['div.photo-wrapper div.Image','src'],
 		function(div,src){
@@ -1421,9 +1715,9 @@
 		null,
 		{no_cache_selector:true}
 	);
-	
 
-	
+
+
 	$R('item\.jd\.com',
 		['.detail-content img','data-lazyload'],
 		function(elm,src) {
@@ -1436,7 +1730,7 @@
 			}
 		}
 	);
-	
+
 	$R('item\.jd\.com',
 		['.spec-items img','src'],
 		function(elm,src) {
@@ -1446,7 +1740,7 @@
 			}
 		}
 	);
-	
+
 	$R('item\.taobao\.com',
 		['ul img','data-src'],
 		function(elm,src) {
@@ -1457,7 +1751,7 @@
 			}
 		}
 	);
-	
+
 	$R('item\.taobao\.com',
 		['#description img','src'],
 		function(elm,src) {
@@ -1469,7 +1763,7 @@
 		null,
 		{no_cache_selector:true}
 	);
-	
+
 	$R('detail\.tmall\.com\/item',
 		['ul.tb-thumb li img','src'],
 		function(elm,src) {
@@ -1498,7 +1792,7 @@
 		null,
 		{no_cache_selector:true}
 	);
-	
+
 	function extract_qvod(text) {
 		console.log("Text:" + text);
 		if(!text) return [];
@@ -1507,7 +1801,7 @@
 			text = decodeURIComponent(text);
 			console.log("LINK:" + text);
 			//bdhd://591151719|764A8F073E149B2A476C404CE119CE36|一夜情深BD版.rmvb|
-			var exp =/((?:bdhd|qvod):\/\/[^\|]+\|[^\|]+\|[^\|]+\|?|jjhd:\/\/[^\|]+\|[^\|]+\|[^\+\|]+)/g; 
+			var exp =/((?:bdhd|qvod):\/\/[^\|]+\|[^\|]+\|[^\|]+\|?|jjhd:\/\/[^\|]+\|[^\|]+\|[^\+\|]+)/g;
 			var m;
 			while((m = exp.exec(text)) != null) {
 				links.push(m[1]);
@@ -1534,7 +1828,7 @@
 		/.*(?:\/player|\/videos|\/Html\/P|\/\?s=vod-play|yuyiyuyi\.com\/gs\/)/,
 		  ['body','id'],
 		  function() {
-			var results = [];		
+			var results = [];
 				for(var prop in [
 					'VideoListJson',
 					'VideoInfoList',
@@ -1557,17 +1851,17 @@
 		  {no_cache_selector:true}
 	  );
 
-	
-	
-	
+
+
+
 	//Select all jpg
-	$R(	
+	$R(
 		'tuigirl8\.com\/forum\/view\/',
 		['img','src'],
 		'attr_match',
 		[/^(.+\.jpg$)/,1,null,document.title]
 	);
-	
+
 	$R(
 		'wd\.koudai\.com',
 		['#detail_wrap img','src'],
@@ -1640,7 +1934,7 @@
 						continue;
 					}
 					else if(pa.nodeName.toLowerCase() == 'a') {
-						var href = pa.href;	
+						var href = pa.href;
 						if(href && href.match(/_\d+\.(?:jpg|png|gif)$/)) {
 							console.log(href);
 							src = href;
@@ -1660,14 +1954,14 @@
 		false,
 		{dialog:true,no_cache_selector:true,inline:false,loadmode:'Interative'}
 	);
-	
+
 	$R('xingyun\.cn',
 		['figure>a:has("img")','href'],
 		function(a,href) {
 			return {src:href,href:DOCHREF,text:DOCTITLE};
 		}
 	);
-	
+
 	$R('aweipai\.com',
 		['article','class'],
 		function(article,cls) {
@@ -1682,14 +1976,14 @@
 			}
 		}
 	);
-	
+
 	$R('(bbs\.voc\.com\.cn|bbs\.[^\/]+\/topic.+\.html)',
 		['img','src'],
 		function(img,src) {
 			if(src) {
 				if(src.match(/http:\/\/image\.hnol\.net\/c\/[^'"]+\.jpg$/)) {
 					return {src:src,text:DOCTITLE,href:DOCHREF};
-				}  
+				}
 			}
 		}
 	)
@@ -1709,13 +2003,13 @@
 			return r;
 		}
 	);
-	
+
 	$R('pic\.onlylady\.com',
 		['#thumb img','src'],
 		'attr_replace',
 		['90x64','985x695']
 	);
-	
+
 	$R('meipai\.com',
 		['li>img','src'],
 		function(img,thumb) {
@@ -1805,29 +2099,29 @@
 					desc:'Webm: <a href="' + p + '.webm">' + t + "_" + m[1] + '.webm' + '</a>' + '<br/>' +
 					     'GIF : <a href="' + p + '.gif">' + t + "_" + m[1] + '.gif' + '</a>',
 				};
-			}	
+			}
 		}
 	);
-	
+
 	$R('8541\.xyz',
 		['div.main img','src'],
 		function(elm,src) {
 			return {src:src,text:src,href:src};
 		},
 	);
-	
+
 	M.addImgSite(
 		/\/thumbs\//,
 		"/",false,
 		/socialtopgirl\.com/
 	);
-		
+
 	M.addImgSite(
 		/\/thumbs\/t_/,
 		"/",false,
 		/www.forum.banzaj.pl/
 	);
-	
+
 	$R('tuccom.com',
 		['a','href'],
 		function(elm,src) {
@@ -1839,14 +2133,14 @@
 		null,
 		{inline:true},
 	);
-	
+
 	$R('porn-image-xxx.com',
 		['amp-img','src'],
 		'attr_match',
 		[/^(.+\.(jpg|jpeg|gif|png))$/,1],
 		{dialog:true},
 	);
-  
+
   	$R(
     "23maott.com\/",
     ['img','data-original'],
@@ -1854,7 +2148,7 @@
     null,
     {dialog:true}
   );
-  
+
 	//****************************************************
 	//Weak Rules
 	//****************************************************
@@ -1864,7 +2158,7 @@
 		'attr_match',
 		[/^(.+\.(jpg|jpeg|gif|png))$/,1],
 	//	RU(
-	//		'http://www.theblackalley.(ws|net|biz|info)' 
+	//		'http://www.theblackalley.(ws|net|biz|info)'
 	//		+ '|http://www.hotasiansnude4u.com'
 	//		+ '|tokyochicks.com'
 	//		+ '|http://www.jp-pussy.com'
@@ -1890,9 +2184,13 @@
 		[/bbs\/attachment\.php(.*)/i,"bbs/attachment.php$1\&noupdate=yes\&nothumb=yes"],
 		{inline:true}
 	);
-	
+
 		$myPlace.lib.datashower.init(M);
 		$myPlace.lib.datashower.start();
-		
+
+    if($myPlace.panel) {
+      $myPlace.panel.addAction("All links",function(){FloatBox.setLinks($myPlace.Cached.IMAGESMINER);FloatBox.toggle()})
+    }
+
 })();
-		
+
